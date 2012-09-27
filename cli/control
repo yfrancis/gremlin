@@ -1,0 +1,10 @@
+Package: co.cocoanuts.gremlin.cli
+Name: gremlin cli
+Depends: co.cocoanuts.gremlin
+Version: 1.0
+Architecture: iphoneos-arm
+Description: cli for gremlin
+Maintainer: CocoaNuts
+Author: CocoaNuts
+Section: System
+Tag: role::hacker

@@ -1,0 +1,21 @@
+Package: co.cocoanuts.gremlin
+Name: Gremlin
+Pre-Depends: firmware (>= 4.2)
+Conflicts: gremlin, co.cocoanuts.gremlin2
+Provides: co.cocoanuts.gremlin2
+Replaces: co.cocoanuts.gremlin2
+Depends: mobilesubstrate
+Version: 3.0
+Architecture: iphoneos-arm
+Description: Media import framework for iOS.
+    Gremlin allows you to import your Photos,
+    Music, Videos, Ringtones, Contacts and
+    all file types supported by your installed
+    apps. Songs and Videos go directly into
+    the iPod app and will even sync back to
+    your desktop iTunes!
+Maintainer: CocoaNuts <apt@cocoanuts.co>
+Author: CocoaNuts <support@cocoanuts.co>
+Section: Multimedia
+Priority: optional
+Tag: purpose::extension
