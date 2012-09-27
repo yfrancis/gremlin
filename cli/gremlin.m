@@ -1,5 +1,4 @@
-#include <CoreFoundation/CoreFoundation.h>
-#include <Gremlin/Gremlin.h>
+#import <Gremlin/Gremlin.h>
 
 @interface Listener : NSObject <GremlinListener>
 @end
