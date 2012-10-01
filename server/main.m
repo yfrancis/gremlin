@@ -4,13 +4,31 @@
 
 #import <Foundation/Foundation.h>
 #import "GRController.h"
+#import "GRDisplayManager.h"
+
+#ifdef HAVE_BUGSENSE
+#include "GRBugSenseAPI.h"
+#import <BugSense-iOS/BugSenseCrashController.h>
+#endif
 
 int main(int argc, char *argv[]) 
 {
-    GRController* controller = [GRController sharedController];
-    NSLog(@"created gremlin controller! %@", controller);
 
-    CFRunLoopRun();
+#ifdef HAVE_BUGSENSE
+    [BugSenseCrashController sharedInstanceWithBugSenseAPIKey:kBSAPIKey
+                                               userDictionary:nil
+                                              sendImmediately:YES];
+#endif
+
+    GRController* controller = [GRController sharedController];
+    GRDisplayManager* display = [GRDisplayManager sharedManager];
+
+    [controller addObserver:display
+                 forKeyPath:@"hasActiveTasks"
+                    options:NSKeyValueObservingOptionNew
+                    context:NULL];
+
+    [controller processImportRequests];
 
 	return 0;
 }

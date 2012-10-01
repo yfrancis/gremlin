@@ -5,6 +5,8 @@
 #import "GRTask.h"
 #import "GRImporterProtocol.h"
 
+typedef void (^GRImportCompletionBlock)(BOOL, NSError*);
+
 @interface GRTaskQueue : NSOperationQueue
 
 @property (retain) NSMutableDictionary* resources;
@@ -13,7 +15,6 @@
 - (void)addTask:(GRTask*)task 
        importer:(Class<GRImporter>)Importer
       resources:(NSArray*)resources
-   successBlock:(GRImportCompletionBlock)succ
-   failureBlock:(GRImportCompletionBlock)fail;
+completionBlock:(GRImportCompletionBlock)complete;
 
 @end

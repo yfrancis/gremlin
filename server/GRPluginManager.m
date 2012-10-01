@@ -24,6 +24,22 @@
 - (id)retain { return self; }
 - (id)autorelease {return self; }
 
+- (NSArray*)_standardizedResourceArray:(NSArray*)ain
+{
+    NSMutableArray* tmp = [NSMutableArray array];
+
+    NSString* lower = nil;
+    for (NSString* resource in ain) {
+        lower = [resource lowercaseString];
+        if ([tmp containsObject:lower] == NO)
+            [tmp addObject:lower];
+    }
+
+    [tmp sortUsingSelector:@selector(compare:)];
+
+    return [[tmp copy] autorelease];
+}
+
 - (Class<GRImporter>)_defaultImporterClassForType:(const CFStringRef)type
                                       destination:(NSString*)destination
                                 requiredResources:(NSArray**)resources
@@ -86,9 +102,16 @@
             query = @"GRDestinationPriority";
             // if a destination is provided, we want to select
             // a plugin that will import to that destination
-            if ([[bundle objectForInfoDictionaryKey:@"GRDestination"]
+            NSDictionary* destDict;
+            destDict = [bundle objectForInfoDictionaryKey:@"GRDestination"];
+
+            if (destDict != nil && 
+                ![destDict isKindOfClass:[NSDictionary class]])
+                continue;
+
+            if ([[destDict objectForKey:@"GRDestinationName"]
                     isEqualToString:destination])
-                support = [bundle infoDictionary];
+                support = destDict;
         }
         else {
             // otherwise just look for a plugin that supports
@@ -98,16 +121,20 @@
             query = (NSString*)type;
         }
 
+        NSLog(@"GRPluginManager: query = %@, support = %@", query, support);
+
+        if (support != nil &&
+            ![support isKindOfClass:[NSDictionary class]])
+            continue;
+
         NSNumber* priority = [support objectForKey:query];
         if (priority == nil) {
             // maybe this plugin supports all generic file types
             // and/or destinations?
             priority = [support objectForKey:@"GRSupportsAll"];
             
-            if (priority == nil) {
-                NSLog(@"plugin does not provide what we need!");
+            if (priority == nil)
                 continue;
-            }
         }
 
         // check plugin priority
@@ -116,18 +143,21 @@
             // check if the bundle principal class conforms to GRImporter
             Class PrincipalClass = [bundle principalClass];
             NSLog(@"got principalclass: %@", PrincipalClass);
-            if ([PrincipalClass conformsToProtocol:@protocol(GRImporter)] == NO)
-                continue;
-            NSLog(@"class conforms!");
-            SelectedPluginClass = (Class<GRImporter>)PrincipalClass;
-            selectedPluginPriority = priorityValue;
-            requiredResources = [bundle objectForInfoDictionaryKey:
+            
+            if ([PrincipalClass conformsToProtocol:@protocol(GRImporter)] &&
+                [PrincipalClass respondsToSelector:@selector(newImportBlock)])
+            {    
+                NSLog(@"class conforms!");
+                SelectedPluginClass = (Class<GRImporter>)PrincipalClass;
+                selectedPluginPriority = priorityValue;
+                requiredResources = [bundle objectForInfoDictionaryKey:
                                     @"GRRequiredResources"];
+            }
        }
     }
 
     if (resources != NULL  && requiredResources != nil)
-        *resources = requiredResources;
+        *resources = [self _standardizedResourceArray:requiredResources];
 
     NSLog(@"returning class: %@", SelectedPluginClass);
 

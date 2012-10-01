@@ -4,4 +4,6 @@
 
 @interface GRDisplayManager : NSObject
 
++ (GRDisplayManager*)sharedManager;
+
 @end

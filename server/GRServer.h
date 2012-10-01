@@ -6,16 +6,15 @@
 #import "GRServerDelegateProtocol.h"
 
 @interface GRServer : NSObject
-{
-    CFMessagePortRef local_port_;
-    CFRunLoopSourceRef rl_source_;
-    NSThread* serverThread_;
-}
 
 @property (assign) id<GRServerImportDelegate> importDelegate;
 
 + (GRServer*)sharedServer;
-- (void)informClientImportCompleteForTask:(GRTask*)task;
+- (void)signalImportCompleteForPath:(NSString*)path
+                             client:(NSString*)client
+                         apiVersion:(NSInteger)apiVersion
+                             status:(BOOL)status
+                              error:(NSError*)error;
 - (void)run;
 
 @end

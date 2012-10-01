@@ -3,8 +3,8 @@
  */
 
 @protocol GremlinListener <NSObject>
-- (void)gremlinImportDidComplete:(NSString*)file;
-- (void)gremlinImportDidFail:(NSString*)file;
+- (void)gremlinImportWasSuccessful:(NSDictionary*)info;
+- (void)gremlinImport:(NSDictionary*)info didFailWithError:(NSError*)error;
 @end
 
 @interface Gremlin : NSObject

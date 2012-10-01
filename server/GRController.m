@@ -7,6 +7,12 @@
 #import "GRTaskQueue.h"
 #import "GRServer.h"
 
+@interface GRController (Private)
+- (void)_processImportCompletionForTask:(GRTask*)task
+                                 status:(BOOL)status
+                                  error:(NSError*)error;
+@end
+
 @implementation GRController
 @synthesize hasActiveTasks;
 
@@ -35,21 +41,7 @@
         [taskQueue addObserver:self
                     forKeyPath:@"operationCount"
                        options:NSKeyValueObservingOptionNew
-                       context:NULL];
-        
-        // initialize the IPC server singleton and assign
-        // ourselves as the server's import delegate
-        GRServer* server = [GRServer sharedServer];
-        server.importDelegate = self;
-
-        // start the server to listen for import requests.
-        // the server will run inside its own thread with
-        // its own runloop
-        NSThread* serverThread;
-        serverThread = [[NSThread alloc] initWithTarget:server
-                                               selector:@selector(run)
-                                                 object:nil];
-        [serverThread start];
+                       context:NULL]; 
     }
     return self;
 }
@@ -62,48 +54,76 @@
     if ([keyPath isEqualToString:@"operationCount"]) {
         NSUInteger newCount = [[change objectForKey:NSKeyValueChangeNewKey]
                                 unsignedIntegerValue];
-        
         self.hasActiveTasks = (newCount > 0);
     }
 }
 
+- (void)processImportRequests
+{
+    // initialize the IPC server singleton and assign
+    // ourselves as the server's import delegate
+    GRServer* server = [GRServer sharedServer];
+    server.importDelegate = self;
+
+    // start the server to listen for import requests
+    [server run];
+
+    NSLog(@"gremlind initializing");
+
+    // start the runloop, the controller will keep this
+    // runloop running until the number of active tasks
+    // reaches zero, and 30s of inactivty elapse
+    while (CFRunLoopRunInMode(kCFRunLoopDefaultMode, 30, 1)
+            == kCFRunLoopRunHandledSource ||
+            self.hasActiveTasks);
+
+    NSLog(@"gremlind terminating");
+}
+
+- (void)_processImportCompletionForTask:(GRTask*)task
+                                 status:(BOOL)status
+                                  error:(NSError*)error
+{
+    [[GRServer sharedServer] signalImportCompleteForPath:task.path
+                                                  client:task.client
+                                              apiVersion:task.apiVersion
+                                                  status:status
+                                                   error:error];
+}
+
 - (void)importFile:(NSString*)path
             client:(NSString*)client
+        apiVersion:(NSInteger)apiVersion
        destination:(NSString*)destination
 {
     GRTask* task = [GRTask taskForPath:path
                                 client:client
+                            apiVersion:apiVersion
                            destination:destination];
 
-    // figure out what importer class to use and
-    // which resources it needs to acquire
-    NSArray* resources = nil;
+    // figure out what importer class to use and which
+    // resources it needs to acquire
+    NSArray* rsrc = nil;
     Class<GRImporter> Importer;
-    GRPluginManager* pm = [GRPluginManager sharedManager];
-    Importer = [pm importerClassForTask:task requiredResources:&resources];
+    Importer = [[GRPluginManager sharedManager] importerClassForTask:task 
+                                                   requiredResources:&rsrc];
+
+    GRImportCompletionBlock complete;
+    complete = ^(BOOL status, NSError* error) {
+        [self _processImportCompletionForTask:task
+                                       status:status
+                                        error:error];
+    };
 
     if (Importer == Nil) {
-        task.successful = NO;
-        [[GRServer sharedServer] informClientImportCompleteForTask:task];
+        complete(NO, nil);
         return;
     }
 
-    // generate success and failure blocks
-    GRImportCompletionBlock succ = Block_copy(^(NSDictionary* info) {
-        task.successful = YES;
-        [[GRServer sharedServer] informClientImportCompleteForTask:task];
-    });
-
-    GRImportCompletionBlock fail = Block_copy(^(NSDictionary* info) {
-        task.successful = NO;
-        [[GRServer sharedServer] informClientImportCompleteForTask:task];
-    });
-
     [[GRTaskQueue sharedQueue] addTask:task 
                               importer:Importer
-                             resources:resources
-                          successBlock:succ
-                          failureBlock:fail];
+                             resources:rsrc
+                       completionBlock:complete];
 }
 
 @end

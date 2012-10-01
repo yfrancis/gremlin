@@ -5,15 +5,15 @@
 
 @implementation Listener
 
-- (void)gremlinImportDidComplete:(NSString*)file 
+- (void)gremlinImportWasSuccessful:(NSDictionary*)info
 {
-    NSLog(@"[%@ gremlinImportDidComplete:%@]", self, file);
+    NSLog(@"gremlinImportWasSuccessful: %@", info);
     exit(0);
 }
 
-- (void)gremlinImportDidFail:(NSString*)file 
+- (void)gremlinImport:(NSDictionary*)info didFailWithError:(NSError*)error
 {
-    NSLog(@"[%@ gremlinImportDidFail:%@]", self, file);
+    NSLog(@"%@ gremlinImport:didFailWithError: %@, %@]", info, error);
     exit(-1);
 }
 

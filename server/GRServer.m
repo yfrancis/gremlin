@@ -2,18 +2,14 @@
 #import "GRIPCProtocol.h"
 
 @interface GRServer (Private)
-+ (BOOL)_portIsValid:(CFMessagePortRef)port;
-- (void)_handlePortInvalidated:(CFMessagePortRef)port;
-- (void)_handleIncomingMessage:(int)msgid withInfo:(NSDictionary*)info;
-- (void)_sendClientMessageForTask:(GRTask*)task;
-- (CFMessagePortRef)_createMessagePortForTask:(GRTask*)task;
-- (CFMessagePortRef)_createLocalMessagePort;
+- (void)_handleImportRequest:(NSDictionary*)info;
 @end
 
-CFDataRef GRS_messageReceived(CFMessagePortRef local, 
-                              SInt32 msgid, 
-                              CFDataRef completeData, 
-                              void* server) 
+static CFDataRef 
+GRS_messageReceived(CFMessagePortRef local,
+                    SInt32 msgid,
+                    CFDataRef completeData,
+                    void* server)
 {
     if (completeData == NULL)
         return NULL;
@@ -38,20 +34,146 @@ CFDataRef GRS_messageReceived(CFMessagePortRef local,
                                            NULL);
     CFRelease(data);
 
-    [(id)server _handleIncomingMessage:msgid withInfo:(NSDictionary*)info];
+    switch (msgid) {
+        case GREMLIN_IMPORT:
+            [(id)server _handleImportRequest:(NSDictionary*)info];
+            break;
+        default:
+            break;
+    }
 
     CFRelease(info);
 
     return NULL;
 }
 
-void GRS_portInvalidated(CFMessagePortRef port, void* info)
+static void 
+GRS_portInvalidated(CFMessagePortRef port, void* info)
 {
-    if (info != NULL)
-        [(id)info _handlePortInvalidated:port];
-    else
-        CFRelease(port);
+    NSLog(@"message port invalidated");
+    CFRelease(port);
 }
+
+static BOOL 
+GRS_portIsValid(CFMessagePortRef port)
+{
+    return (port != NULL && CFMessagePortIsValid(port));
+}
+
+static CFMessagePortRef 
+GRS_createRemoteMessagePortForClient(CFStringRef client)
+{
+    if (client != NULL) {
+        CFMessagePortRef port = CFMessagePortCreateRemote(NULL, client);
+        if (GRS_portIsValid(port) == YES) {
+            CFMessagePortSetInvalidationCallBack(port, GRS_portInvalidated);
+            return port;
+        }
+    }
+    return NULL;
+}
+
+static CFMessagePortRef 
+GRS_createLocalMessagePort(void* server)
+{
+    CFStringRef localPortName = CFSTR(gremlind_MessagePortName);
+    CFMessagePortContext context = {0, server, NULL, NULL, NULL};
+    CFMessagePortRef local_port;
+    local_port = CFMessagePortCreateLocal(NULL,
+                                         localPortName,
+                                         GRS_messageReceived,
+                                         &context,
+                                         NULL);	
+
+    CFMessagePortSetInvalidationCallBack(local_port, 
+                                         GRS_portInvalidated);
+
+    CFRunLoopSourceRef source;
+    source = CFMessagePortCreateRunLoopSource(NULL, local_port, 0);
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+    CFRelease(source);
+
+    return local_port;
+}
+
+static void
+GRS_sendImportCompletionStatusToClient(CFStringRef path,
+                                       CFStringRef client,
+                                       CFIndex apiVersion,
+                                       Boolean success,
+                                       CFErrorRef error)
+{
+    int msgid = 0;
+    CFDataRef data = NULL;
+
+    // wrap task info for transmission
+    if (apiVersion < 2) {
+        // determine msgid
+        msgid = (success == true) ? GREMLIN_SUCC_LEGACY : GREMLIN_FAIL_LEGACY;
+
+        // clients using old API expect only a path
+        data = CFStringCreateExternalRepresentation(kCFAllocatorDefault,
+                                                    path,
+                                                    kCFStringEncodingUTF8,
+                                                    0);
+    }
+    else {
+        // determine msgid for new API
+        msgid = (success == true) ? GREMLIN_SUCCESS : GREMLIN_FAILURE;
+
+        // clients using apiVersion > 2 expect a dictionary
+        // encapsulating import info and results
+        CFDictionaryRef dict;
+        int keyCount = 1;
+        CFDictionaryRef error_info = NULL;
+        if (error != NULL) {
+            keyCount += 1;
+            CFErrorCopyUserInfo(error);
+        }
+
+        const void* keys[] = {CFSTR("path"), CFSTR("error_info")};
+        const void* values[] = {path, error_info};
+
+        dict = CFDictionaryCreate(kCFAllocatorDefault,
+                                  keys,
+                                  values,
+                                  keyCount,
+                                  &kCFTypeDictionaryKeyCallBacks,
+                                  &kCFTypeDictionaryValueCallBacks);
+        
+        if (error_info != NULL)
+            CFRelease(error_info);
+
+        data = CFPropertyListCreateData(kCFAllocatorDefault,
+                                        dict,
+                                        kCFPropertyListBinaryFormat_v1_0,
+                                        0,
+                                        NULL);
+        CFRelease(dict);
+    }
+
+    if (data == NULL)
+        data = CFDataCreate(kCFAllocatorDefault, NULL, 0);
+
+    // create remote port to communicate with client
+    CFMessagePortRef port;
+    port = GRS_createRemoteMessagePortForClient(client);
+
+    if (GRS_portIsValid(port) == YES) {
+        // transmit message to client
+        CFMessagePortSendRequest(port, msgid, data, 0, 0, NULL, NULL);
+        
+        // invalidate the port once we are done with it
+        CFMessagePortInvalidate(port);
+    }
+    else {
+        if (port != NULL)
+            CFRelease(port);
+    }
+
+    CFRelease(data);
+}
+
 
 @implementation GRServer
 @synthesize importDelegate;
@@ -71,137 +193,49 @@ void GRS_portInvalidated(CFMessagePortRef port, void* info)
 - (id)retain { return self; }
 - (id)autorelease { return self; }
 
-+ (BOOL)_portIsValid:(CFMessagePortRef)port
+- (void)_handleImportRequest:(NSDictionary*)info
 {
-    return (port != NULL && CFMessagePortIsValid(port));
-}
+    NSLog(@"_handleImportRequest: %@", info);
 
-- (CFMessagePortRef)_createRemoteMessagePortForTask:(GRTask*)task
-{
-    CFStringRef client = (CFStringRef)task.client;
-    if (client != nil) {
-        CFMessagePortRef port = CFMessagePortCreateRemote(NULL, client);
-        if ([GRServer _portIsValid:port]) {
-            CFMessagePortSetInvalidationCallBack(port, GRS_portInvalidated);
-            return port;
+    NSString* client = [info objectForKey:@"center"];
+    NSArray* files = [info objectForKey:@"import"];
+    NSInteger apiVersion = [[info objectForKey:@"apiVersion"] integerValue];
+
+    [files enumerateObjectsUsingBlock:^(id file, NSUInteger idx, BOOL* stop) {
+        NSString* filePath, * destination = nil;
+        if ([file isKindOfClass:[NSDictionary class]]) {
+            filePath = [file objectForKey:@"path"];
+            destination = [file objectForKey:@"destination"];
         }
-    }
-    return NULL;
+        else if ([file isKindOfClass:[NSString class]])
+            filePath = file;
+        else
+            return;
+        
+        [importDelegate importFile:filePath
+                            client:client
+                        apiVersion:apiVersion
+                       destination:destination];
+    }];
 }
 
-- (CFMessagePortRef)_createLocalMessagePort
+- (void)signalImportCompleteForPath:(NSString*)path
+                             client:(NSString*)client
+                         apiVersion:(NSInteger)apiVersion
+                             status:(BOOL)status
+                              error:(NSError*)error
 {
-    CFStringRef localPortName = CFSTR(gremlind_MessagePortName);
-    CFMessagePortContext context = {0, (void*)self, NULL, NULL, NULL};
-    local_port_ = CFMessagePortCreateLocal(NULL,
-                                           localPortName,
-                                           GRS_messageReceived,
-                                           &context,
-                                           NULL);	
-    CFMessagePortSetInvalidationCallBack(local_port_, GRS_portInvalidated);
-
-    rl_source_ = CFMessagePortCreateRunLoopSource(NULL, local_port_, 0);
-    CFRunLoopAddSource(CFRunLoopGetCurrent(), rl_source_, kCFRunLoopDefaultMode);
-
-    return local_port_;
-}
-
-- (void)_handlePortInvalidated:(CFMessagePortRef)port
-{
-    // our local port should never be invalidated, if it is, we
-    // need to recreate it and re-add it to the runloop
-    if (CFEqual(port, local_port_)) {
-        // deallocate the old port, we'll be making a new one
-        CFRelease(local_port_);
-        local_port_ = NULL;
-
-        // remove the old runloop source from the current runloop
-        if (rl_source_ != NULL) {
-            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), 
-                                  rl_source_,
-                                  kCFRunLoopDefaultMode);
-            CFRelease(rl_source_);
-            rl_source_ = NULL;
-        }
-
-        [self _createLocalMessagePort];
-    }
-}
-
-- (void)_handleIncomingMessage:(int)msgid withInfo:(NSDictionary*)info
-{
-    NSLog(@"%@ _handleIncomingMessage:%d, %@", self, msgid, info);
-
-    switch (msgid) {
-        case GREMLIN_IMPORT: {
-            NSString* client = [info objectForKey:@"center"];
-            NSArray* files = [info objectForKey:@"import"];
-
-            for (id file in files) {
-                NSString* filePath, * destination = nil;
-                if ([file isKindOfClass:[NSDictionary class]]) {
-                    filePath = [file objectForKey:@"path"];
-                    destination = [file objectForKey:@"destination"];
-                }
-                else if ([file isKindOfClass:[NSString class]])
-                    filePath = file;
-                else
-                    continue;
-                
-                NSLog(@"importDelegate: %@", importDelegate);
-
-                [importDelegate importFile:filePath
-                                    client:client
-                               destination:destination];
-            }
-        } break;
-
-        default:
-            break;
-    }
-}
-
-- (void)_sendClientMessageForTask:(GRTask*)task
-{
-    CFDataRef data;
-    data = (CFDataRef)[task.path dataUsingEncoding:NSUTF8StringEncoding];
-
-    CFMessagePortRef port;
-    port = [self _createRemoteMessagePortForTask:task];
-
-    int msgid = task.successful ? GREMLIN_SUCC : GREMLIN_FAIL;
-
-    if (port != NULL)
-        CFMessagePortSendRequest(port, msgid, data, 0, 0, NULL, NULL);
-}
-
-- (void)informClientImportCompleteForTask:(GRTask*)task
-{
-    [self performSelector:@selector(_sendClientMessageForTask:)
-                 onThread:serverThread_
-               withObject:task
-            waitUntilDone:NO];
+    GRS_sendImportCompletionStatusToClient((CFStringRef)path, 
+                                           (CFStringRef)client,
+                                           (CFIndex)apiVersion,
+                                           (Boolean)status,
+                                           (CFErrorRef)error);
 }
 
 - (void)run
 {
-    NSAutoreleasePool* pool = [NSAutoreleasePool new];
-
-    serverThread_ = [[NSThread currentThread] retain];
-
-    [self _createLocalMessagePort];
-
-    CFRunLoopRun();
-
-    NSLog(@"gremlind server thread terminated!");
-
-    if (local_port_ != NULL)
-        CFMessagePortInvalidate(local_port_);
-
-    [serverThread_ release];
-    serverThread_ = nil;
-
-    [pool drain];
+    // set up a local port to listen for incoming import requests
+    GRS_createLocalMessagePort((void*)self);
 }
 
 @end

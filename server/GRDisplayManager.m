@@ -8,6 +8,21 @@
 
 @implementation GRDisplayManager
 
++ (GRDisplayManager*)sharedManager
+{
+    static dispatch_once_t once;
+    static GRDisplayManager* sharedManager;
+    dispatch_once(&once, ^{
+        sharedManager = [[self alloc] init];
+    });
+    return sharedManager;
+}
+
+- (oneway void)release {}
+- (NSUInteger)retainCount { return NSUIntegerMax; }
+- (id)retain { return self; }
+- (id)autorelease { return self; }
+
 - (void)observeValueForKeyPath:(NSString*)keyPath
                       ofObject:(id)object
                         change:(NSDictionary*)change

@@ -9,5 +9,6 @@
 @property (assign) BOOL hasActiveTasks;
 
 + (GRController*)sharedController;
+- (void)processImportRequests;
 
 @end

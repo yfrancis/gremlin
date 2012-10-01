@@ -18,48 +18,70 @@
 @end
 
 @protocol GRClientDelegate <NSObject>
-- (void)_handleImportFailureForPath:(NSString*)path;
-- (void)_handleImportSuccessForPath:(NSString*)path;
++ (void)_handleImportFailureWithInfo:(NSDictionary*)info;
++ (void)_handleImportSuccessWithInfo:(NSDictionary*)info;
 @end
 
-/*
- *  GremlinListener Message Handler
- */
-static CFDataRef GRC_messageReceived(CFMessagePortRef local, 
-                                     SInt32 msgid, 
-                                     CFDataRef data, 
-                                     void* info) 
+static CFDictionaryRef
+_GRC_createUnwrappedMessage(CFDataRef data)
 {
-    NSString* path = nil;
-    if (data != NULL)
-        path = [[NSString alloc] initWithData:(NSData*)data
-                                     encoding:NSUTF8StringEncoding];
-    
-    id<GRClientDelegate> delegate = (id<GRClientDelegate>)info;
+    CFPropertyListRef info = NULL;
+    if (data != NULL) {
+        info = CFPropertyListCreateWithData(kCFAllocatorDefault,
+                                            data,
+                                            kCFPropertyListImmutable,
+                                            NULL,
+                                            NULL);
+    }
+    return (CFDictionaryRef)info;
+}
+
+static CFDataRef 
+GRC_messageReceived(CFMessagePortRef local, 
+                    SInt32 msgid, 
+                    CFDataRef data, 
+                    void* info) 
+{    
+    Class<GRClientDelegate> delegate = (Class<GRClientDelegate>)info;
     
     switch (msgid) {
-        case GREMLIN_FAIL:
-            if (delegate != nil)
-                [delegate _handleImportFailureForPath:path];
-            break;
-        case GREMLIN_SUCC:
-            if (delegate != nil)
-                [delegate _handleImportSuccessForPath:path];
-            break;
+        case GREMLIN_SUCCESS: {
+                CFDictionaryRef dict = _GRC_createUnwrappedMessage(data);
+                [delegate _handleImportSuccessWithInfo:(NSDictionary*)dict];
+                CFRelease(dict);
+        } break;
+        case GREMLIN_FAILURE: {
+                CFDictionaryRef dict = _GRC_createUnwrappedMessage(data);
+                [delegate _handleImportFailureWithInfo:(NSDictionary*)dict];
+                CFRelease(dict);
+        } break;
         default:
             break;
     }
 
-    [path release];
-
     return NULL;
 }
 
-void GRC_portInvalidated(CFMessagePortRef port, void*info)
+void 
+GRC_localPortInvalidated(CFMessagePortRef port, void*info)
 {
     // deallocate the port once it's been successfully
     // invalidated
     CFRelease(port);
+}
+
+void 
+GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
+{
+    NSLog(@"PORT INVALIDATED LOLOLOLOL");
+    
+    // looks like the server died (crashed), we should
+    // inform the client. since we have no pointer to
+    // either the delegate or listener, we should post
+    // a notiifcation, and the delegate will handle it
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+    [nc postNotificationName:@"co.cocoanuts.gremlin.server_died"
+                      object:nil];
 }
 
 @implementation GRClient
@@ -137,8 +159,7 @@ void GRC_portInvalidated(CFMessagePortRef port, void*info)
 
     // assert(path != nil);
 
-    NSString* execPath;
-    execPath = [NSString stringWithUTF8String:path];
+    NSString* execPath = [NSString stringWithUTF8String:path];
 
     free(path);
 
@@ -162,7 +183,9 @@ void GRC_portInvalidated(CFMessagePortRef port, void*info)
                                               GRC_messageReceived,
                                               &context, 
                                               NULL);
-        CFMessagePortSetInvalidationCallBack(local_port_, GRC_portInvalidated);
+        
+        CFMessagePortSetInvalidationCallBack(local_port_, 
+                                             GRC_localPortInvalidated);
         
         // if rl_source_ already exists, remove it from the runloop
         if (rl_source_ != NULL) {
@@ -192,6 +215,8 @@ void GRC_portInvalidated(CFMessagePortRef port, void*info)
         const CFStringRef serverPortName = 
             CFSTR(gremlind_MessagePortName);
         server_port_ = CFMessagePortCreateRemote(NULL, serverPortName);
+        CFMessagePortSetInvalidationCallBack(server_port_,
+                                             GRC_serverPortInvalidated);
     }
 
     return server_port_;

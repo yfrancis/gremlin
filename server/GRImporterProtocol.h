@@ -1,10 +1,10 @@
-typedef void (^GRImportOperationBlock)(void);
-typedef void (^GRImportCompletionBlock)(NSDictionary* info);
+/*
+ * Created by Youssef Francis on September 25th, 2012.
+ */
+
+typedef BOOL (^GRImportOperationBlock)(NSDictionary*, NSError**);
 
 @protocol GRImporter <NSObject>
-
-+ (GRImportOperationBlock)newImportBlockWithInfo:(NSDictionary*)info 
-                                    successBlock:(GRImportCompletionBlock)succ
-                                    failureBlock:(GRImportCompletionBlock)fail;
-
++ (GRImportOperationBlock)newImportBlock;
 @end
+

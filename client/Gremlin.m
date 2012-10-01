@@ -5,25 +5,61 @@
 #import "Gremlin.h"
 #import "GRClient.h"
 
+#define kGremlinAPIVersion 2
+
 static id<GremlinListener> listener_ = nil;
+
+@interface Gremlin (Private)
++ (void)_handleGremlinServerDeath:(NSNotification*)notif;
++ (void)_handleImportFailureWithInfo:(NSDictionary*)info;
++ (void)_handleImportSuccessWithInfo:(NSDictionary*)info;
+@end
+
 @implementation Gremlin
 
-+ (void)_handleImportFailureForPath:(NSString*)path
++ (void)initialize
 {
-    SEL selector = @selector(gremlinImportDidFail:);
-    if ([listener_ respondsToSelector:selector])
-        [(id)listener_ performSelectorOnMainThread:selector
-                                        withObject:path
-                                    waitUntilDone:NO];
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+        [nc addObserver:self
+               selector:@selector(_handleGremlinServerDeath:)
+                   name:@"co.cocoanuts.gremlin.serverdied"
+                 object:nil];
+    });
 }
 
-+ (void)_handleImportSuccessForPath:(NSString*)path
++ (void)_handleGremlinServerDeath:(NSNotification*)notif
 {
-    SEL selector = @selector(gremlinImportDidComplete:);
+    if ([[notif name] isEqualToString:@"co.cocoanuts.gremlin.serverdied"]) {
+        NSDictionary* info = [NSDictionary dictionaryWithObject:@"serverdied"
+                                                         forKey:@"reason"];
+        [self _handleImportFailureWithInfo:info];
+    }
+}
+
++ (void)_handleImportFailureWithInfo:(NSDictionary*)info
+{
+    SEL selector = @selector(gremlinImport:didFailWithError:);
+    
+    NSDictionary* errorInfo = [info objectForKey:@"error_info"];
+    NSError* error = [NSError errorWithDomain:@"gremlin"
+                                         code:0
+                                     userInfo:errorInfo];
+
     if ([listener_ respondsToSelector:selector])
-        [(id)listener_ performSelectorOnMainThread:selector
-                                        withObject:path
-                                    waitUntilDone:NO];
+        [listener_ performSelector:selector
+                        withObject:info
+                        withObject:error];
+}
+
++ (void)_handleImportSuccessWithInfo:(NSDictionary*)info
+{
+    SEL selector = @selector(gremlinImportWasSuccessful:); 
+        
+    if ([listener_ respondsToSelector:selector])
+        [listener_ performSelector:selector
+                        withObject:info];
 }
 
 + (BOOL)haveGremlin 
@@ -52,6 +88,8 @@ static id<GremlinListener> listener_ = nil;
 {
     NSMutableDictionary* dict = [NSMutableDictionary dictionary];
     [dict setObject:files forKey:@"import"];
+    [dict setObject:[NSNumber numberWithInt:kGremlinAPIVersion] 
+             forKey:@"apiVersion"];
 
     BOOL haveListener = (listener_ != nil);
     [[GRClient sharedClient] sendServerMessage:dict
