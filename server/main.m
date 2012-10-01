@@ -8,7 +8,7 @@
 
 #ifdef HAVE_BUGSENSE
 #include "GRBugSenseAPI.h"
-#import <BugSense-iOS/BugSenseCrashController.h>
+#import <BugSense/BugSenseCrashController.h>
 #endif
 
 int main(int argc, char *argv[]) 
