@@ -3,7 +3,8 @@
  */
 
 @protocol GRServerImportDelegate <NSObject>
-- (void)importFile:(NSString*)path
+- (void)importTask:(NSString*)uuid
+              path:(NSString*)path
             client:(NSString*)client
         apiVersion:(NSInteger)apiVersion
        destination:(NSString*)destination;

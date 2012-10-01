@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_BUGSENSE
     [BugSenseCrashController sharedInstanceWithBugSenseAPIKey:kBSAPIKey
                                                userDictionary:nil
-                                              sendImmediately:YES];
+                                              sendImmediately:NO];
 #endif
 
     GRController* controller = [GRController sharedController];

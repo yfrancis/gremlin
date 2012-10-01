@@ -13,7 +13,10 @@ static id<GremlinListener> listener_ = nil;
 + (void)_handleGremlinServerDeath:(NSNotification*)notif;
 + (void)_handleImportFailureWithInfo:(NSDictionary*)info;
 + (void)_handleImportSuccessWithInfo:(NSDictionary*)info;
++ (void)_updateTaskInfoForImports:(NSArray*)imports;
 @end
+
+static NSMutableDictionary* localImports_ = nil;
 
 @implementation Gremlin
 
@@ -21,25 +24,50 @@ static id<GremlinListener> listener_ = nil;
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
+        localImports_ = [NSMutableDictionary new];
+
         NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
         [nc addObserver:self
                selector:@selector(_handleGremlinServerDeath:)
-                   name:@"co.cocoanuts.gremlin.serverdied"
+                   name:@"co.cocoanuts.gremlin.server.crash"
                  object:nil];
     });
 }
 
 + (void)_handleGremlinServerDeath:(NSNotification*)notif
 {
-    if ([[notif name] isEqualToString:@"co.cocoanuts.gremlin.serverdied"]) {
-        NSDictionary* info = [NSDictionary dictionaryWithObject:@"serverdied"
+    if ([[notif name] isEqualToString:@"co.cocoanuts.gremlin.server.crash"]) {
+        NSDictionary* info = [NSDictionary dictionaryWithObject:@"server.crash"
                                                          forKey:@"reason"];
         [self _handleImportFailureWithInfo:info];
     }
 }
 
++ (BOOL)_isValidTask:(NSDictionary*)info
+{
+    NSString* uuid = [info objectForKey:@"uuid"];
+    NSDictionary* localVersion = [localImports_ objectForKey:uuid];
+
+    NSString* localPath = [localVersion objectForKey:@"path"];
+    NSString* path = [info objectForKey:@"path"];
+
+    NSLog(@"incoming: %@", info);
+    NSLog(@"localVersion: %@", localVersion);
+
+    if ([path isEqualToString:localPath]) {
+        // remove from local imports
+        [localImports_ removeObjectForKey:uuid];
+        return YES;
+    }
+
+    return NO;
+}
+
 + (void)_handleImportFailureWithInfo:(NSDictionary*)info
 {
+    if (![self _isValidTask:info])
+        return;
+
     SEL selector = @selector(gremlinImport:didFailWithError:);
     
     NSDictionary* errorInfo = [info objectForKey:@"error_info"];
@@ -55,6 +83,9 @@ static id<GremlinListener> listener_ = nil;
 
 + (void)_handleImportSuccessWithInfo:(NSDictionary*)info
 {
+    if (![self _isValidTask:info])
+        return;
+
     SEL selector = @selector(gremlinImportWasSuccessful:); 
         
     if ([listener_ respondsToSelector:selector])
@@ -84,28 +115,56 @@ static id<GremlinListener> listener_ = nil;
     [[GRClient sharedClient] unregisterForNotifications];
 }
 
-+ (void)importFiles:(NSArray*)files 
++ (void)_updateTaskInfoForImports:(NSArray*)imports
+{
+    for (NSMutableDictionary* task in imports) {
+        // generate uuid for task
+        CFUUIDRef uuid = CFUUIDCreate(NULL);
+        NSString* uuidstr = (NSString*)CFUUIDCreateString(NULL, uuid);
+        CFRelease(uuid);
+
+        // add uuid to task info dict
+        [task setObject:uuidstr forKey:@"uuid"];
+
+        // add task to local imports dict
+        [localImports_ setObject:task forKey:uuidstr];
+        [uuidstr release];
+    }
+}
+
++ (BOOL)importFiles:(NSArray*)files 
 {
     NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+    
+    // give each individual task a uuid
+    [self _updateTaskInfoForImports:files];
+
     [dict setObject:files forKey:@"import"];
     [dict setObject:[NSNumber numberWithInt:kGremlinAPIVersion] 
              forKey:@"apiVersion"];
 
     BOOL haveListener = (listener_ != nil);
-    [[GRClient sharedClient] sendServerMessage:dict
-                                  haveListener:haveListener];
+    return [[GRClient sharedClient] sendServerMessage:dict
+                                         haveListener:haveListener];
 }
 
-+ (void)importFileAtPath:(NSString*)path 
++ (BOOL)importFileWithInfo:(NSDictionary*)info 
 {
-    if (path)
-        [Gremlin importFiles:[NSArray arrayWithObject:path]];
+    if (info) {
+        NSMutableDictionary* mut = [[info mutableCopy] autorelease];
+        return [Gremlin importFiles:[NSArray arrayWithObject:mut]];
+    }
+    return NO;
 }
 
-+ (void)importFileWithInfo:(NSDictionary*)info 
++ (BOOL)importFileAtPath:(NSString*)path 
 {
-    if (info)
-        [Gremlin importFiles:[NSArray arrayWithObject:info]];
+    if (path) {
+        NSDictionary* info = [NSDictionary dictionaryWithObject:path
+                                                         forKey:@"path"];
+        return [Gremlin importFileWithInfo:info];
+    }
+    return NO;
 }
 
 @end

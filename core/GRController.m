@@ -6,6 +6,7 @@
 #import "GRPluginManager.h"
 #import "GRTaskQueue.h"
 #import "GRServer.h"
+#import "GRManifest.h"
 
 @interface GRController (Private)
 - (void)_processImportCompletionForTask:(GRTask*)task
@@ -41,7 +42,27 @@
         [taskQueue addObserver:self
                     forKeyPath:@"operationCount"
                        options:NSKeyValueObservingOptionNew
-                       context:NULL]; 
+                       context:NULL];
+
+        // check if we previously crashed and inform clients
+        NSArray* recovered = [GRManifest recoveredTasks];
+        
+        NSDictionary* error_info;
+        error_info = [NSDictionary dictionaryWithObject:@"crashed"
+                                                 forKey:@"reason"];
+
+        NSError* error = [NSError errorWithDomain:@"gremlin"
+                                             code:500
+                                         userInfo:error_info];
+
+        for (NSDictionary* info in recovered) {
+            GRTask* task = [GRTask taskWithInfo:info];
+            [self _processImportCompletionForTask:task
+                                           status:NO
+                                            error:error];
+        }
+
+        [GRManifest clearManifest];
     }
     return self;
 }
@@ -68,8 +89,6 @@
     // start the server to listen for import requests
     [server run];
 
-    NSLog(@"gremlind initializing");
-
     // start the runloop, the controller will keep this
     // runloop running until the number of active tasks
     // reaches zero, and 30s of inactivty elapse
@@ -84,19 +103,22 @@
                                  status:(BOOL)status
                                   error:(NSError*)error
 {
-    [[GRServer sharedServer] signalImportCompleteForPath:task.path
+    [[GRServer sharedServer] signalImportCompleteForTask:task.uuid
+                                                    path:task.path
                                                   client:task.client
                                               apiVersion:task.apiVersion
                                                   status:status
                                                    error:error];
 }
 
-- (void)importFile:(NSString*)path
+- (void)importTask:(NSString*)uuid
+              path:(NSString*)path
             client:(NSString*)client
         apiVersion:(NSInteger)apiVersion
        destination:(NSString*)destination
 {
-    GRTask* task = [GRTask taskForPath:path
+    GRTask* task = [GRTask taskForUUID:uuid
+                                  path:path
                                 client:client
                             apiVersion:apiVersion
                            destination:destination];
@@ -110,6 +132,8 @@
 
     GRImportCompletionBlock complete;
     complete = ^(BOOL status, NSError* error) {
+        [GRManifest removeTask:task];
+
         [self _processImportCompletionForTask:task
                                        status:status
                                         error:error];
@@ -120,6 +144,10 @@
         return;
     }
 
+    // add task to persistent manifest
+    [GRManifest addTask:task];
+
+    // queue the import task
     [[GRTaskQueue sharedQueue] addTask:task 
                               importer:Importer
                              resources:rsrc

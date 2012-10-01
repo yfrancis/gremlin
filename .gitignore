@@ -2,4 +2,4 @@
 _
 .theos
 include/GRBugSenseAPI.h
-server/Frameworks
+core/Frameworks

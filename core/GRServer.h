@@ -10,7 +10,8 @@
 @property (assign) id<GRServerImportDelegate> importDelegate;
 
 + (GRServer*)sharedServer;
-- (void)signalImportCompleteForPath:(NSString*)path
+- (void)signalImportCompleteForTask:(NSString*)uuid
+                               path:(NSString*)path
                              client:(NSString*)client
                          apiVersion:(NSInteger)apiVersion
                              status:(BOOL)status

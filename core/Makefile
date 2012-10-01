@@ -13,8 +13,4 @@ gremlind_FRAMEWORKS = MobileCoreServices
 gremlind_PRIVATE_FRAMEWORKS = AppSupport
 gremlind_CFLAGS += -ggdb -I../include
 
-# BugSense
-gremlind_CFLAGS += -DHAVE_BUGSENSE
-gremlind_LDFLAGS += -lBugSense
-
 include $(THEOS_MAKE_PATH)/tool.mk

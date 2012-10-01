@@ -44,7 +44,7 @@ GRS_messageReceived(CFMessagePortRef local,
 
     CFRelease(info);
 
-    return NULL;
+    return CFRetain(completeData);
 }
 
 static void 
@@ -97,7 +97,8 @@ GRS_createLocalMessagePort(void* server)
 }
 
 static void
-GRS_sendImportCompletionStatusToClient(CFStringRef path,
+GRS_sendImportCompletionStatusToClient(CFStringRef uuid,
+                                       CFStringRef path,
                                        CFStringRef client,
                                        CFIndex apiVersion,
                                        Boolean success,
@@ -124,15 +125,15 @@ GRS_sendImportCompletionStatusToClient(CFStringRef path,
         // clients using apiVersion > 2 expect a dictionary
         // encapsulating import info and results
         CFDictionaryRef dict;
-        int keyCount = 1;
+        int keyCount = 2;
         CFDictionaryRef error_info = NULL;
         if (error != NULL) {
             keyCount += 1;
-            CFErrorCopyUserInfo(error);
+            error_info = CFErrorCopyUserInfo(error);
         }
 
-        const void* keys[] = {CFSTR("path"), CFSTR("error_info")};
-        const void* values[] = {path, error_info};
+        const void* keys[] = {CFSTR("uuid"), CFSTR("path"), CFSTR("error_info")};
+        const void* values[] = {uuid, path, error_info};
 
         dict = CFDictionaryCreate(kCFAllocatorDefault,
                                   keys,
@@ -202,8 +203,9 @@ GRS_sendImportCompletionStatusToClient(CFStringRef path,
     NSInteger apiVersion = [[info objectForKey:@"apiVersion"] integerValue];
 
     [files enumerateObjectsUsingBlock:^(id file, NSUInteger idx, BOOL* stop) {
-        NSString* filePath, * destination = nil;
+        NSString* uuid, * filePath, * destination = nil;
         if ([file isKindOfClass:[NSDictionary class]]) {
+            uuid = [file objectForKey:@"uuid"];
             filePath = [file objectForKey:@"path"];
             destination = [file objectForKey:@"destination"];
         }
@@ -212,20 +214,23 @@ GRS_sendImportCompletionStatusToClient(CFStringRef path,
         else
             return;
         
-        [importDelegate importFile:filePath
+        [importDelegate importTask:uuid
+                              path:filePath
                             client:client
                         apiVersion:apiVersion
                        destination:destination];
     }];
 }
 
-- (void)signalImportCompleteForPath:(NSString*)path
+- (void)signalImportCompleteForTask:(NSString*)uuid
+                               path:(NSString*)path
                              client:(NSString*)client
                          apiVersion:(NSInteger)apiVersion
                              status:(BOOL)status
                               error:(NSError*)error
 {
-    GRS_sendImportCompletionStatusToClient((CFStringRef)path, 
+    GRS_sendImportCompletionStatusToClient((CFStringRef)uuid,
+                                           (CFStringRef)path, 
                                            (CFStringRef)client,
                                            (CFIndex)apiVersion,
                                            (Boolean)status,

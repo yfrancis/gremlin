@@ -4,13 +4,16 @@
 
 @interface GRTask : NSObject
 
+@property (retain) NSString* uuid;
 @property (retain) NSString* path;
 @property (retain) NSString* client;
 @property (assign) NSInteger apiVersion;
 @property (retain) NSString* destination;
 
 - (NSDictionary*)dictionaryRepresentation;
-+ (GRTask*)taskForPath:(NSString*)path
++ (GRTask*)taskWithInfo:(NSDictionary*)info;
++ (GRTask*)taskForUUID:(NSString*)uuid
+                  path:(NSString*)path
                 client:(NSString*)client
             apiVersion:(NSInteger)apiVersion
            destination:(NSString*)destination;

@@ -9,8 +9,8 @@
 
 @interface Gremlin : NSObject
 + (BOOL)haveGremlin;
-+ (void)importFiles:(NSArray*)files;
-+ (void)importFileAtPath:(NSString*)path;
-+ (void)importFileWithInfo:(NSDictionary*)info;
++ (BOOL)importFiles:(NSArray*)files;
++ (BOOL)importFileAtPath:(NSString*)path;
++ (BOOL)importFileWithInfo:(NSDictionary*)info;
 + (BOOL)registerNotifications:(id<GremlinListener>)listener;
 @end

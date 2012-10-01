@@ -17,7 +17,7 @@
 - (BOOL)registerForNotifications:(id)delegate;
 - (void)unregisterForNotifications;
 
-- (void)sendServerMessage:(NSDictionary*)msgInfo
+- (BOOL)sendServerMessage:(NSDictionary*)msgInfo
              haveListener:(BOOL)haveListener;
 - (BOOL)haveGremlin;
 

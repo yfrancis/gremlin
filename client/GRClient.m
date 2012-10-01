@@ -14,7 +14,7 @@
 - (CFMessagePortRef)_localPort;
 - (void)_destroyLocalPort;
 - (CFDataRef)_createMessageWithInfo:(CFDictionaryRef)info;
-- (void)_sendMessage:(CFDataRef)data;
+- (BOOL)_sendMessage:(CFDataRef)data;
 @end
 
 @protocol GRClientDelegate <NSObject>
@@ -73,14 +73,12 @@ GRC_localPortInvalidated(CFMessagePortRef port, void*info)
 void 
 GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
 {
-    NSLog(@"PORT INVALIDATED LOLOLOLOL");
-    
     // looks like the server died (crashed), we should
     // inform the client. since we have no pointer to
     // either the delegate or listener, we should post
     // a notiifcation, and the delegate will handle it
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
-    [nc postNotificationName:@"co.cocoanuts.gremlin.server_died"
+    [nc postNotificationName:@"co.cocoanuts.gremlin.server.crashed"
                       object:nil];
 }
 
@@ -118,19 +116,6 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
         self.localPortName = [bundleID stringByAppendingString:@".gremlin"];
     }
     return self;
-}
-
-- (void)_sendMessage:(CFDataRef)msg
-{
-    CFMessagePortRef port = [self _serverPort];
-    if (port)
-        CFMessagePortSendRequest(port, 
-                                 GREMLIN_IMPORT, 
-                                 msg, 
-                                 0, 
-                                 0, 
-                                 NULL, 
-                                 NULL);
 }
 
 - (CFDataRef)_createMessageWithInfo:(CFDictionaryRef)info
@@ -207,19 +192,58 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
 
 - (CFMessagePortRef)_serverPort
 {
-    if (server_port_ == NULL || 
-        CFMessagePortIsValid(server_port_) == NO) {
+    // check if current server port is valid
+    if (![GRClient _portIsValid:server_port_]) {
         if (server_port_ != NULL) 
             CFRelease(server_port_);
         
+        // if port is invalid/nonexistent we should try once to create it
         const CFStringRef serverPortName = 
             CFSTR(gremlind_MessagePortName);
         server_port_ = CFMessagePortCreateRemote(NULL, serverPortName);
-        CFMessagePortSetInvalidationCallBack(server_port_,
-                                             GRC_serverPortInvalidated);
+        
+        // if this attempt succeeds, set up the port
+        if ([GRClient _portIsValid:server_port_]) {
+            NSLog(@"port is valid, returning %p", server_port_);
+            CFMessagePortSetInvalidationCallBack(server_port_,
+                                                 GRC_serverPortInvalidated);
+        }
+        else {
+            // otherwise clean up and dont retry, if this method
+            // returns NULL the caller is to assume that communication
+            // is impossible and inform the client of the failure
+            if (server_port_ != NULL)
+                CFRelease(server_port_);
+            server_port_ = NULL;
+        }
     }
 
     return server_port_;
+}
+
+- (BOOL)_sendMessage:(CFDataRef)msg
+{
+    CFMessagePortRef port = [self _serverPort];
+    if (port != NULL) {
+        int result = 0;
+        CFDataRef response = NULL;
+        result = CFMessagePortSendRequest(port, 
+                                 GREMLIN_IMPORT, 
+                                 msg, 
+                                 5, 
+                                 5, 
+                                 kCFRunLoopDefaultMode, 
+                                 &response);
+        NSLog(@"CFMessagePortSendRequest result: %d", result);
+        if (response != NULL)
+            CFShow(response);
+        return (result == kCFMessagePortSuccess);
+    }
+
+    // if we couldn't get a server port, we should
+    // inform the client that this import request
+    // has failed
+    return NO;
 }
 
 - (BOOL)registerForNotifications:(id)delegate
@@ -234,19 +258,24 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
     [self _destroyLocalPort];
 }
 
-- (void)sendServerMessage:(NSMutableDictionary*)msgInfo
+- (BOOL)sendServerMessage:(NSMutableDictionary*)msgInfo
              haveListener:(BOOL)haveListener
 {
+    BOOL status = NO;
     if (haveListener == YES) {
         [msgInfo setObject:localPortName_
                     forKey:@"center"];
     }
 
+    NSLog(@"sendMessage: %@", msgInfo);
+
     CFDataRef msg = [self _createMessageWithInfo:(CFDictionaryRef)msgInfo];
     if (msg != NULL) {
-        [self _sendMessage:msg];
+        status = [self _sendMessage:msg];
         CFRelease(msg);
     }
+
+    return status;
 }
 
 - (BOOL)haveGremlin

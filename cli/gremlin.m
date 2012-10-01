@@ -39,9 +39,10 @@ int main(int argc, const char **argv, char **envp)
 
         NSLog(@"gremlin: importing %@", info);
 
-        [Gremlin importFileWithInfo:info];
-        
-        CFRunLoopRun();
+        if ([Gremlin importFileWithInfo:info])
+            CFRunLoopRun();
+        else
+            NSLog(@"import request failed");
     }
 	
     [pool drain];
