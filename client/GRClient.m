@@ -193,7 +193,6 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
         
         // if this attempt succeeds, set up the port
         if ([GRClient _portIsValid:server_port_]) {
-            NSLog(@"port is valid, returning %p", server_port_);
             CFMessagePortSetInvalidationCallBack(server_port_,
                                                  GRC_serverPortInvalidated);
         }
@@ -223,9 +222,7 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
                                  5, 
                                  kCFRunLoopDefaultMode, 
                                  &response);
-        NSLog(@"CFMessagePortSendRequest result: %d", result);
-        if (response != NULL)
-            CFShow(response);
+
         return (result == kCFMessagePortSuccess);
     }
 
@@ -255,8 +252,6 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
         [msgInfo setObject:localPortName_
                     forKey:@"center"];
     }
-
-    NSLog(@"sendMessage: %@", msgInfo);
 
     CFDataRef msg = [self _createMessageWithInfo:(CFDictionaryRef)msgInfo];
     if (msg != NULL) {
