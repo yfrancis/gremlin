@@ -120,18 +120,7 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
 
 - (CFDataRef)_createMessageWithInfo:(CFDictionaryRef)info
 {
-    CFDataRef odat = CFPropertyListCreateXMLData(kCFAllocatorDefault, info);
-    CFIndex olen = CFDataGetLength(odat);
-    char* obuf = (char*)CFDataGetBytePtr(odat);
-
-    // pad with 32 bytes for backwards compatibility
-    int nlen = olen + 32;
-    char* nbuf = (char*)malloc(nlen);
-    memset(nbuf, 0, nlen);
-    memcpy(nbuf, obuf, olen);
-    
-    CFDataRef ndat = CFDataCreate(kCFAllocatorDefault, (UInt8*)nbuf, nlen);
-    return ndat;
+    return CFPropertyListCreateXMLData(kCFAllocatorDefault, info);
 }
 
 - (NSString*)_executableName

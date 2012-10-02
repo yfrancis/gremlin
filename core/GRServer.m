@@ -11,39 +11,49 @@ GRS_messageReceived(CFMessagePortRef local,
                     CFDataRef completeData,
                     void* server)
 {
-    if (completeData == NULL)
-        return NULL;
-
-    // API maintains backward-compatibility, but ignores digest
-    int dataLen = CFDataGetLength(completeData);
-    UInt8* dataPtr = (UInt8*)CFDataGetBytePtr(completeData);
-
-    if (dataLen == 0 || dataPtr == NULL)
-        return NULL;
-
-    CFDataRef data = CFDataCreate(kCFAllocatorDefault, dataPtr, dataLen-32);
-
-    if (data == NULL)
-        return NULL;
-
-    // Reconstitute the dictionary using the XML data.
-    CFPropertyListRef info;
-    info = CFPropertyListCreateFromXMLData(kCFAllocatorDefault,
-                                           data,
-                                           kCFPropertyListImmutable,
-                                           NULL);
-    CFRelease(data);
+    CFPropertyListRef info = NULL;
 
     switch (msgid) {
-        case GREMLIN_IMPORT:
-            [(id)server _handleImportRequest:(NSDictionary*)info];
-            break;
+        case GREMLIN_IMPORT_LEGACY: {
+            if (completeData == NULL)
+                return NULL;
+
+            // API maintains backward-compatibility, but ignores digest
+            int dataLen = CFDataGetLength(completeData);
+            UInt8* dataPtr = (UInt8*)CFDataGetBytePtr(completeData);
+
+            if (dataLen == 0 || dataPtr == NULL)
+                return NULL;
+
+            CFDataRef data = CFDataCreate(kCFAllocatorDefault, dataPtr, dataLen-32);
+
+            if (data == NULL)
+                return NULL;
+
+            // Reconstitute the dictionary using the XML data.
+            info = CFPropertyListCreateFromXMLData(kCFAllocatorDefault,
+                                                   data,
+                                                   kCFPropertyListImmutable,
+                                                   NULL);
+            CFRelease(data);
+        } break;
+        case GREMLIN_IMPORT: {
+            // Reconstitute the dictionary using the XML data.
+            info = CFPropertyListCreateFromXMLData(kCFAllocatorDefault,
+                                                   completeData,
+                                                   kCFPropertyListImmutable,
+                                                   NULL);
+        } break;
         default:
-            break;
+            return NULL;
     }
 
-    CFRelease(info);
+    if (info != NULL) {
+        [(id)server _handleImportRequest:(NSDictionary*)info];
+        CFRelease(info);
+    }
 
+    // receiver releases this data according to CFMessagePort spec
     return CFRetain(completeData);
 }
 
