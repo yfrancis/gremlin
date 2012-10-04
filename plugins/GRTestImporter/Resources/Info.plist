@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>GRTestImporter</string>
+	<key>CFBundleIdentifier</key>
+	<string>co.cocoanuts.gremlin.GRTestImporter</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>GRDestination</key>
+	<dict>
+		<key>GRDestinationName</key>
+		<string>co.cocoanuts.test</string>
+		<key>GRDestinationPriority</key>
+		<integer>100</integer>
+	</dict>
+	<key>GRRequiredResources</key>
+	<array>
+		<string>com.apple.launchservices</string>
+		<string>com.apple.addressbook</string>
+		<string>com.apple.photos</string>
+	</array>
+	<key>GRSupportedTypes</key>
+	<dict>
+		<key>public.jpeg</key>
+		<integer>100</integer>
+		<key>public.png</key>
+		<integer>100</integer>
+		<key>public.vcard</key>
+		<integer>100</integer>
+	</dict>
+	<key>MinimumCFVersionNumber</key>
+	<string>550.52</string>
+	<key>NSPrincipalClass</key>
+	<string>GRTestImporter</string>
+</dict>
+</plist>

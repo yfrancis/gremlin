@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KeepAlive</key>
+	<dict>
+		<key>SuccessfulExit</key>
+		<false/>
+	</dict>
+	<key>Label</key>
+	<string>co.cocoanuts.gremlin</string>
+	<key>MachServices</key>
+	<dict>
+		<key>co.cocoanuts.gremlin.center</key>
+		<string></string>
+	</dict>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Library/Frameworks/Gremlin.framework/Support/gremlind</string>
+	</array>
+	<key>UserName</key>
+	<string>mobile</string>
+</dict>
+</plist>

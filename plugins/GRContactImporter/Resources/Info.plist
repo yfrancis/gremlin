@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>GRContactImporter</string>
+	<key>CFBundleIdentifier</key>
+	<string>co.cocoanuts.gremlin.GRContactImporter</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>GRRequiredResources</key>
+	<array>
+		<string>com.apple.addressbook</string>
+	</array>
+	<key>GRSupportedTypes</key>
+	<dict>
+		<key>public.vcard</key>
+		<integer>100</integer>
+	</dict>
+	<key>MinimumCFVersionNumber</key>
+	<string>550.52</string>
+	<key>NSPrincipalClass</key>
+	<string>GRContactImporter</string>
+</dict>
+</plist>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>GRiTunesImporter</string>
+	<key>CFBundleIdentifier</key>
+	<string>co.cocoanuts.gremlin.GRiTunesImporter</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>GRDestination</key>
+	<dict>
+		<key>GRDestinationName</key>
+		<string>com.apple.ipod</string>
+		<key>GRDestinationPriority</key>
+		<integer>100</integer>
+	</dict>
+	<key>GRRequiredResources</key>
+	<array>
+		<string>com.apple.ipod</string>
+		<string>com.apple.coreaudio</string>
+	</array>
+	<key>GRSupportedTypes</key>
+	<dict>
+		<key>com.apple.m4a-audio</key>
+		<integer>100</integer>
+		<key>public.mp3</key>
+		<integer>100</integer>
+		<key>public.mpeg-4-audio</key>
+		<integer>100</integer>
+	</dict>
+	<key>MinimumCFVersionNumber</key>
+	<integer>675</integer>
+	<key>NSPrincipalClass</key>
+	<string>GRiTunesImporter</string>
+</dict>
+</plist>

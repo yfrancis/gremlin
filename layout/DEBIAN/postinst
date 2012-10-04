@@ -1,4 +1,0 @@
-#!/bin/sh
-/bin/chown root:wheel /Library/LaunchDaemons/co.cocoanuts.gremlind.plist
-/bin/launchctl load /Library/LaunchDaemons/co.cocoanuts.gremlind.plist 2&> /dev/null
-exit 0

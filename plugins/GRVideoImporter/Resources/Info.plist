@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>GRVideoImporter</string>
+	<key>CFBundleIdentifier</key>
+	<string>co.cocoanuts.gremlin.GRVideoImporter</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>GRDestination</key>
+	<dict>
+		<key>GRDestinationName</key>
+		<string>com.apple.mobileslideshow</string>
+		<key>GRDestinationPriority</key>
+		<integer>99</integer>
+	</dict>
+	<key>GRRequiredResources</key>
+	<array>
+		<string>com.apple.photolibrary</string>
+	</array>
+	<key>GRSupportedTypes</key>
+	<dict>
+		<key>public.3gpp</key>
+		<integer>100</integer>
+		<key>public.3gpp2</key>
+		<integer>100</integer>
+		<key>public.mpeg-4</key>
+		<integer>2</integer>
+	</dict>
+	<key>MinimumCFVersionNumber</key>
+	<string>675.00</string>
+	<key>NSPrincipalClass</key>
+	<string>GRVideoImporter</string>
+</dict>
+</plist>

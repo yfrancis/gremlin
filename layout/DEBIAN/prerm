@@ -1,3 +1,0 @@
-#!/bin/sh
-/bin/launchctl unload /Library/LaunchDaemons/co.cocoanuts.gremlind.plist 2&> /dev/null
-exit 0
