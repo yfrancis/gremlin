@@ -36,6 +36,8 @@
 		<integer>100</integer>
 		<key>public.mp3</key>
 		<integer>100</integer>
+		<key>public.mpeg-4</key>
+		<integer>100</integer>
 		<key>public.mpeg-4-audio</key>
 		<integer>100</integer>
 	</dict>

@@ -13,6 +13,7 @@
 
 int main(int argc, char *argv[]) 
 {
+    NSAutoreleasePool* pool = [NSAutoreleasePool new];
 
 #ifdef HAVE_BUGSENSE
     [BugSenseCrashController sharedInstanceWithBugSenseAPIKey:kBSAPIKey
@@ -29,6 +30,8 @@ int main(int argc, char *argv[])
                     context:NULL];
 
     [controller processImportRequests];
+
+    [pool drain];
 
 	return 0;
 }

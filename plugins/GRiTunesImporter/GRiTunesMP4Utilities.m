@@ -103,7 +103,6 @@ supportedForSession:(AVAssetExportSession*)session
     // we need to scan for ID3 metadata and convert it to itunes metadata
     // where possible (i.e. for keys in the common keyspace)
     NSArray* sourceMetadata = [asset commonMetadata];
-
     for (AVMutableMetadataItem* mdi in sourceMetadata) {
         NSString* key = [itunesKeys objectForKey:mdi.commonKey];
         if (key != nil) {
@@ -192,6 +191,13 @@ supportedForSession:(AVAssetExportSession*)session
                              error:error] == YES) {
                 // copy failed, import cannot continue
                 status = AVAssetExportSessionStatusCompleted;
+
+                // now get the file metadata if the user needs it
+                if (mdout != NULL) {
+                    NSURL* destURL = [NSURL fileURLWithPath:dest];
+                    AVAsset* asset = [AVAsset assetWithURL:destURL];
+                    *mdout = [self _metadataForAsset:asset];
+                }
             }
             break;
         default: {

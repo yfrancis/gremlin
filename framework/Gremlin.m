@@ -150,7 +150,7 @@ static NSMutableDictionary* localImports_ = nil;
 
 + (BOOL)importFileWithInfo:(NSDictionary*)info 
 {
-    if (info) {
+    if (info != nil) {
         NSMutableDictionary* mut = [[info mutableCopy] autorelease];
         return [Gremlin importFiles:[NSArray arrayWithObject:mut]];
     }
@@ -159,7 +159,7 @@ static NSMutableDictionary* localImports_ = nil;
 
 + (BOOL)importFileAtPath:(NSString*)path 
 {
-    if (path) {
+    if (path != nil) {
         NSDictionary* info = [NSDictionary dictionaryWithObject:path
                                                          forKey:@"path"];
         return [Gremlin importFileWithInfo:info];
