@@ -36,7 +36,7 @@ static NSMutableDictionary* manifest_ = nil;
 + (void)addTask:(GRTask*)task
 {
     @synchronized(manifest_) {
-        [manifest_ setObject:[task dictionaryRepresentation]
+        [manifest_ setObject:[task info]
                       forKey:task.uuid];
 
         [self _synchronize];

@@ -13,7 +13,7 @@
     static dispatch_once_t once;
     static GRTaskQueue* sharedQueue;
     dispatch_once(&once, ^{ 
-            sharedQueue = [[self alloc] init]; 
+        sharedQueue = [[self alloc] init]; 
     });
     return sharedQueue;
 }
@@ -38,7 +38,7 @@
       resources:(NSArray*)requiredResources
 completionBlock:(GRImportCompletionBlock)complete
 {
-    NSDictionary* taskInfo = [task dictionaryRepresentation];
+    NSDictionary* taskInfo = [task info];
     GRImportCompletionBlock done = [complete copy];
 
     [self addOperationWithBlock:^{

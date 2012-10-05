@@ -86,7 +86,12 @@
     server.importDelegate = self;
 
     // start the server to listen for import requests
-    [server run];
+    // if the server is unable to initialize, we should
+    // just terminate right here
+    if ([server run] == NO) {
+        NSLog(@"server init failed, terminating");
+        return;
+    }
 
     // start the runloop, the controller will keep this
     // runloop running until the number of active tasks
@@ -95,33 +100,20 @@
             == kCFRunLoopRunHandledSource ||
             self.hasActiveTasks);
 
-    NSLog(@"gremlind terminating");
+    NSLog(@"server went idle, terminating");
 }
 
 - (void)_processImportCompletionForTask:(GRTask*)task
                                  status:(BOOL)status
                                   error:(NSError*)error
 {
-    [[GRServer sharedServer] signalImportCompleteForTask:task.uuid
-                                                    path:task.path
-                                                  client:task.client
-                                              apiVersion:task.apiVersion
+    [[GRServer sharedServer] signalImportCompleteForTask:task
                                                   status:status
                                                    error:error];
 }
 
-- (void)importTask:(NSString*)uuid
-              path:(NSString*)path
-            client:(NSString*)client
-        apiVersion:(NSInteger)apiVersion
-       destination:(NSString*)destination
+- (void)importTask:(GRTask*)task 
 {
-    GRTask* task = [GRTask taskForUUID:uuid
-                                  path:path
-                                client:client
-                            apiVersion:apiVersion
-                           destination:destination];
-
     // figure out what importer class to use and which
     // resources it needs to acquire
     NSArray* rsrc = nil;

@@ -5,7 +5,8 @@
     uuid = uuid_,
     path = path_, 
     client = client_, 
-    apiVersion = apiVersion_, 
+    apiVersion = apiVersion_,
+    mediaKind = mediaKind_,
     destination = destination_;
 
 + (NSString*)getUUID
@@ -16,7 +17,7 @@
     return [(NSString*)string autorelease];
 }
 
-- (NSDictionary*)dictionaryRepresentation
+- (NSDictionary*)info
 {
     NSMutableDictionary* temp = [NSMutableDictionary dictionary];
     [temp setObject:uuid_ forKey:@"uuid"];
@@ -27,6 +28,9 @@
         [temp setObject:[NSNumber numberWithInteger:apiVersion_]
                  forKey:@"apiVersion"];
     }
+
+    if (mediaKind_ != nil)
+        [temp setObject:mediaKind_ forKey:@"mediaKind"];
     
     if (destination_ != nil)
         [temp setObject:destination_ forKey:@"destination"];
@@ -38,6 +42,7 @@
                path:(NSString*)path
              client:(NSString*)client
          apiVersion:(NSInteger)apiVersion
+          mediaKind:(NSString*)mediaKind
         destination:(NSString*)destination
 {
     self = [super init];
@@ -46,6 +51,7 @@
         self.path = path;
         self.client = client;
         self.apiVersion = apiVersion;
+        self.mediaKind = mediaKind;
         self.destination = destination;
     }
     return self;
@@ -57,6 +63,7 @@
                           path:[info objectForKey:@"path"]
                         client:[info objectForKey:@"client"]
                     apiVersion:[[info objectForKey:@"apiVersion"] integerValue]
+                     mediaKind:[info objectForKey:@"mediaKind"]
                    destination:[info objectForKey:@"destination"]];
 }
 
@@ -64,12 +71,14 @@
                   path:(NSString*)path
                 client:(NSString*)client
             apiVersion:(NSInteger)apiVersion
+             mediaKind:(NSString*)mediaKind
            destination:(NSString*)destination
 {
     return [[[GRTask alloc] _initWithUUID:uuid
                                      path:path 
                                    client:client
                                apiVersion:apiVersion
+                                mediaKind:mediaKind
                               destination:destination] autorelease];
 }
 
@@ -78,6 +87,7 @@
     self.uuid = nil;
     self.path = nil;
     self.client = nil;
+    self.mediaKind = nil;
     self.destination = nil;
     [super dealloc];
 }

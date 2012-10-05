@@ -60,7 +60,6 @@ GRS_messageReceived(CFMessagePortRef local,
 static void 
 GRS_portInvalidated(CFMessagePortRef port, void* info)
 {
-    NSLog(@"message port invalidated");
     CFRelease(port);
 }
 
@@ -107,18 +106,23 @@ GRS_createLocalMessagePort(void* server)
 }
 
 static void
-GRS_sendImportCompletionStatusToClient(CFStringRef uuid,
-                                       CFStringRef path,
-                                       CFStringRef client,
-                                       CFIndex apiVersion,
+GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
                                        Boolean success,
                                        CFErrorRef error)
 {
+    SInt32 apiVersion = 0;
+    CFNumberRef apiNum = CFDictionaryGetValue(info, CFSTR("apiVersion"));
+    if (apiNum != NULL)
+        CFNumberGetValue(apiNum, kCFNumberSInt32Type, &apiVersion);
+    CFStringRef client = CFDictionaryGetValue(info, CFSTR("client"));
+
     int msgid = 0;
     CFDataRef data = NULL;
 
     // wrap task info for transmission
     if (apiVersion < 2) {
+        CFStringRef path = CFDictionaryGetValue(info, CFSTR("path"));
+
         // determine msgid
         msgid = (success == true) ? GREMLIN_SUCC_LEGACY : GREMLIN_FAIL_LEGACY;
 
@@ -133,34 +137,11 @@ GRS_sendImportCompletionStatusToClient(CFStringRef uuid,
         msgid = (success == true) ? GREMLIN_SUCCESS : GREMLIN_FAILURE;
 
         // clients using apiVersion > 2 expect a dictionary
-        // encapsulating import info and results
-        CFDictionaryRef dict;
-        int keyCount = 2;
-        CFDictionaryRef error_info = NULL;
-        if (error != NULL) {
-            keyCount += 1;
-            error_info = CFErrorCopyUserInfo(error);
-        }
-
-        const void* keys[] = {CFSTR("uuid"), CFSTR("path"), CFSTR("error_info")};
-        const void* values[] = {uuid, path, error_info};
-
-        dict = CFDictionaryCreate(kCFAllocatorDefault,
-                                  keys,
-                                  values,
-                                  keyCount,
-                                  &kCFTypeDictionaryKeyCallBacks,
-                                  &kCFTypeDictionaryValueCallBacks);
-        
-        if (error_info != NULL)
-            CFRelease(error_info);
-
         data = CFPropertyListCreateData(kCFAllocatorDefault,
                                         dict,
                                         kCFPropertyListBinaryFormat_v1_0,
                                         0,
                                         NULL);
-        CFRelease(dict);
     }
 
     if (data == NULL)
@@ -213,44 +194,49 @@ GRS_sendImportCompletionStatusToClient(CFStringRef uuid,
     NSInteger apiVersion = [[info objectForKey:@"apiVersion"] integerValue];
 
     [files enumerateObjectsUsingBlock:^(id file, NSUInteger idx, BOOL* stop) {
-        NSString* uuid, * filePath, * destination = nil;
+        NSString* uuid, * filePath, * mediaKind, * destination = nil;
         if ([file isKindOfClass:[NSDictionary class]]) {
             uuid = [file objectForKey:@"uuid"];
             filePath = [file objectForKey:@"path"];
+            mediaKind = [file objectForKey:@"mediaKind"];
             destination = [file objectForKey:@"destination"];
         }
         else if ([file isKindOfClass:[NSString class]])
             filePath = file;
         else
             return;
-        
-        [importDelegate importTask:uuid
-                              path:filePath
-                            client:client
-                        apiVersion:apiVersion
-                       destination:destination];
+       
+        // generate a GRTask to represent this import request
+        GRTask* task = [GRTask taskWithUUID:uuid
+                                       path:filePath
+                                     client:client
+                                 apiVersion:apiVersion
+                                  mediaKind:mediaKind
+                                destination:destination];
+
+        [importDelegate importTask:task];
     }];
 }
 
-- (void)signalImportCompleteForTask:(NSString*)uuid
-                               path:(NSString*)path
-                             client:(NSString*)client
-                         apiVersion:(NSInteger)apiVersion
+- (void)signalImportCompleteForTask:(GRTask*)task
                              status:(BOOL)status
                               error:(NSError*)error
 {
-    GRS_sendImportCompletionStatusToClient((CFStringRef)uuid,
-                                           (CFStringRef)path, 
-                                           (CFStringRef)client,
-                                           (CFIndex)apiVersion,
-                                           (Boolean)status,
-                                           (CFErrorRef)error);
+    NSDictionary* info = [task info];
+
+    if (error.userInfo != nil) {
+        info = [NSMutableDictionary dictionaryWithDictionary:info];
+        [info setObject:error.userInfo forKey:@"error_info"];
+    }
+
+    GRS_sendImportCompletionStatusWithInfo((CFDictionaryRef)info,
+                                           (Boolean)status);
 }
 
-- (void)run
+- (BOOL)run
 {
     // set up a local port to listen for incoming import requests
-    GRS_createLocalMessagePort((void*)self);
+    return (GRS_createLocalMessagePort((void*)self) != NULL);
 }
 
 @end
