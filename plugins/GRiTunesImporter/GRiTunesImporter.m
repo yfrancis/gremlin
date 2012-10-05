@@ -6,12 +6,14 @@
 #import "GRiTunesImportHelper.h"
 #import "GRiTunesMP4Utilities.h"
 
+#import <AVFoundation/AVFoundation.h>
+
 @interface GRiTunesImporter : NSObject <GRImporter>
 @end
 
 @implementation GRiTunesImporter
 
-+ (NSString*)makeTemporaryDirectory
++ (NSString*)_makeTemporaryDirectory
 {
     NSString* tmplStr;
     NSString* mkdstr = @"gremlin.XXXXXX";
@@ -36,34 +38,112 @@
     return ret;
 }
 
++ (NSDictionary*)_metadataForAsset:(AVAsset*)asset
+{
+    NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+
+    // scan common metadata keys
+    NSArray* commonMetadata = [asset commonMetadata];
+    for (AVMetadataItem* mdi in commonMetadata) {
+        id value = mdi.value;
+        
+        // artwork has special handling
+        if ([mdi.commonKey isEqualToString:AVMetadataCommonKeyArtwork]) {
+            NSData* imageData = nil;
+            if ([mdi.keySpace isEqualToString:AVMetadataKeySpaceID3])
+                imageData = [value objectForKey:@"data"];
+            else if ([mdi.keySpace isEqualToString:AVMetadataKeySpaceiTunes])
+                imageData = value;
+            
+            if (imageData != nil)
+                [dict setObject:imageData forKey:@"imageData"];
+        }
+        else if ([value isKindOfClass:[NSString class]])
+            [dict setObject:value
+                     forKey:mdi.commonKey];
+    }
+
+    // we also need the duration in ms
+    CMTime duration = asset.duration;
+    uint64_t ms = CMTimeGetSeconds(duration) * 1000;
+    [dict setObject:[NSNumber numberWithUnsignedLongLong:ms]
+        forKey:@"duration"];
+    
+    return dict;
+}
+
 + (GRImportOperationBlock)newImportBlock
 {
     return Block_copy(^(NSDictionary* info, NSError** error)
     {
+        NSString* opath = nil;
         NSString* ipath = [info objectForKey:@"path"];
+        NSString* mediaKind = [info objectForKey:@"mediaKind"];
+        if (mediaKind == nil)
+            mediaKind = @"song";
+
+        NSURL* iURL = [NSURL fileURLWithPath:ipath];
+        AVAsset* asset = [AVURLAsset assetWithURL:iURL];
+        NSDictionary* metadata = [self _metadataForAsset:asset];
+
         // create temp directory to house the processed file
-        NSString* tempDir = [self makeTemporaryDirectory];
+        NSString* tempDir = [self _makeTemporaryDirectory];
 
-        // determine output path for conversion (or plain copy)
-        NSString* filename;
-        filename = [[ipath lastPathComponent] stringByDeletingPathExtension];
-        NSString* opath = [[tempDir stringByAppendingPathComponent:filename]
-                            stringByAppendingPathExtension:@"m4a"];
+        // flag to indicate if preprocessing was successful
+        BOOL status = NO;
 
-        // perform the conversion
-        NSDictionary* metadata = nil;
-        BOOL converted = [GRiTunesMP4Utilities convertFileToM4A:ipath
-                                                           dest:opath
-                                                       metadata:&metadata
-                                                          error:error];
+        if ([mediaKind isEqualToString:@"song"]) {
+            // determine output path for conversion (or plain copy)
+            NSString* fname;
+            fname = [[ipath lastPathComponent] stringByDeletingPathExtension];
+            opath = [[tempDir stringByAppendingPathComponent:fname]
+                        stringByAppendingPathExtension:@"m4a"];
 
-        // if conversion fails, the import cannot continue
-        if (converted == NO)
-            return NO;
+            // perform the conversion
+            status = [GRiTunesMP4Utilities convertAsset:asset
+                                                   dest:opath
+                                                  error:error];
+        }
+        // TODO: set up custom handling for each of these types
+        // where appropriate (some may not require it)
+        else if ([mediaKind isEqualToString:@"music-video"]) {
 
-        // return status
-        return [GRiTunesImportHelper importAudioFileAtPath:opath
-                                              withMetadata:metadata];
+        }
+        else if ([mediaKind isEqualToString:@"feature-movie"]) {
+
+        }
+        else if ([mediaKind isEqualToString:@"tv-episode"]) {
+
+        }
+        else if ([mediaKind isEqualToString:@"podcast"]) {
+            // determine output path for copy
+            NSString* fname;
+            fname = [ipath lastPathComponent];
+            opath = [tempDir stringByAppendingPathComponent:fname];
+
+            // copy the file to temp
+            NSFileManager* fm = [NSFileManager defaultManager];
+            status = [fm copyItemAtURL:iURL
+                                 toURL:[NSURL fileURLWithPath:opath]
+                                 error:error];
+        }
+        else if ([mediaKind isEqualToString:@"videoPodcast"]) {
+             
+        }
+
+        // if preprocessing was successful, attempt to import into itunes
+        if (status == YES) {
+            // return status
+            status = [GRiTunesImportHelper importAudioFileAtPath:opath
+                                                       mediaKind:mediaKind
+                                                    withMetadata:metadata];
+        }
+
+        // clean-up: remove temp dir created at start of import
+        NSFileManager* fm = [NSFileManager defaultManager];
+        [fm removeItemAtPath:tempDir error:nil];
+
+        return status;
     });
 }
 

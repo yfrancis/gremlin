@@ -11,6 +11,7 @@
 @implementation GRiTunesImportHelper
 
 + (BOOL)importAudioFileAtPath:(NSString*)path
+                    mediaKind:(NSString*)mediaKind
                  withMetadata:(NSDictionary*)info
 {
     // we need to move the files into a sandbox-reachable dir
@@ -20,7 +21,26 @@
                                             toPath:npath
                                              error:nil];
 
-    SSDownloadMetadata* mtd = [[SSDownloadMetadata alloc] initWithKind:@"song"];
+    // podcast handling
+    if ([mediaKind isEqualToString:@"podcast"] ||
+        [mediaKind isEqualToString:@"videoPodcast"]) {
+        
+    }
+    else {
+        // songs + movies + tv shows
+        if ([mediaKind isEqualToString:@"song"]) {
+        
+        }
+        else if ([mediaKind isEqualToString:@"feature-movie"]) {
+
+        }
+        else if ([mediaKind isEqualToString:@"tv-episode"]) {
+
+        }
+    }
+
+    SSDownloadMetadata* mtd;
+    mtd = [[SSDownloadMetadata alloc] initWithKind:mediaKind];
     [mtd setPrimaryAssetURL:[NSURL fileURLWithPath:npath]];
 
     double duration = [[info objectForKey:@"duration"] doubleValue];

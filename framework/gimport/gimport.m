@@ -7,13 +7,13 @@
 
 - (void)gremlinImportWasSuccessful:(NSDictionary*)info
 {
-    NSLog(@"gremlinImportWasSuccessful: %@", info);
+    NSLog(@"gimport: gremlinImportWasSuccessful: %@", info);
     exit(0);
 }
 
 - (void)gremlinImport:(NSDictionary*)info didFailWithError:(NSError*)error
 {
-    NSLog(@"%@ gremlinImport:didFailWithError: %@, %@]", info, error);
+    NSLog(@"gimport: gremlinImport:didFailWithError: %@, %@]", info, error);
     exit(-1);
 }
 
@@ -28,21 +28,26 @@ int main(int argc, const char **argv, char **envp)
         [Gremlin registerNotifications:[Listener new]];
         
         NSString* path = [NSString stringWithUTF8String:argv[1]];
-        NSString* destination = nil;
-        if (argc == 3)
+        NSString* destination, * mediaKind = nil;
+        if (argc >= 3) {
             destination = [NSString stringWithUTF8String:argv[2]];
+            if (argc == 4)
+                mediaKind = [NSString stringWithUTF8String:argv[3]];
+        }
 
         NSMutableDictionary* info = [NSMutableDictionary dictionary];
         [info setObject:path forKey:@"path"];
         if (destination != nil)
             [info setObject:destination forKey:@"destination"];
+        if (mediaKind != nil)
+            [info setObject:mediaKind forKey:@"mediaKind"];
 
-        NSLog(@"gremlin: importing %@", info);
+        NSLog(@"gimport: importing %@", info);
 
         if ([Gremlin importFileWithInfo:info])
             CFRunLoopRun();
         else
-            NSLog(@"import request failed");
+            NSLog(@"gimport: import request failed");
     }
 	
     [pool drain];

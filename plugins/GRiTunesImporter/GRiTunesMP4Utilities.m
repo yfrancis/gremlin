@@ -1,6 +1,5 @@
 #import "GRiTunesMP4Utilities.h"
 
-#import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 
 @implementation GRiTunesMP4Utilities
@@ -28,40 +27,6 @@
     AudioFileClose(fileID);
 
     return fileType;
-}
-
-+ (NSDictionary*)_metadataForAsset:(AVAsset*)asset
-{
-    NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-
-    // scan common metadata keys
-    NSArray* commonMetadata = asset.commonMetadata;
-    for (AVMetadataItem* mdi in commonMetadata) {
-        id value = mdi.value;
-        
-        // artwork has special handling
-        if ([mdi.commonKey isEqualToString:AVMetadataCommonKeyArtwork]) {
-            NSData* imageData = nil;
-            if ([mdi.keySpace isEqualToString:AVMetadataKeySpaceID3])
-                imageData = [value objectForKey:@"data"];
-            else if ([mdi.keySpace isEqualToString:AVMetadataKeySpaceiTunes])
-                imageData = value;
-            
-            if (imageData != nil)
-                [dict setObject:imageData forKey:@"imageData"];
-        }
-        else if ([value isKindOfClass:[NSString class]])
-            [dict setObject:value
-                     forKey:mdi.commonKey];
-    }
-
-    // we also need the duration in ms
-    CMTime duration = asset.duration;
-    uint64_t ms = CMTimeGetSeconds(duration) * 1000;
-    [dict setObject:[NSNumber numberWithUnsignedLongLong:ms]
-        forKey:@"duration"];
-    
-    return dict;
 }
 
 + (BOOL)_fileOutput:(NSString*)fileType
@@ -124,14 +89,12 @@ supportedForSession:(AVAssetExportSession*)session
     return sourceMetadata;
 }
 
-+ (AVAssetExportSessionStatus)_convertFile:(NSURL*)srcURL
-                                    outURL:(NSURL*)outURL
-                                outputType:(NSString*)outputType
-                                  metadata:(NSDictionary**)mdout
++ (AVAssetExportSessionStatus)_convertAsset:(AVAsset*)asset
+                                     outURL:(NSURL*)outURL
+                                 outputType:(NSString*)outputType
 {
     AVAssetExportSession* session;
     NSString* preset = AVAssetExportPresetAppleM4A;
-    AVURLAsset* asset = [AVURLAsset assetWithURL:srcURL];
     session = [AVAssetExportSession exportSessionWithAsset:asset 
                                                 presetName:preset];
 
@@ -154,21 +117,17 @@ supportedForSession:(AVAssetExportSession*)session
     [convLock unlock];
     [convLock release];
 
-    if (mdout != NULL)
-        *mdout = [self _metadataForAsset:asset];
-
     return [session status];
 }
 
-+ (BOOL)convertFileToM4A:(NSString*)src 
-                    dest:(NSString*)dest
-                metadata:(NSDictionary**)mdout
-                   error:(NSError**)error
++ (BOOL)convertAsset:(AVURLAsset*)asset
+                dest:(NSString*)dest
+               error:(NSError**)error
 {
     NSFileManager* fm = [NSFileManager defaultManager]; 
     [fm removeItemAtPath:dest error:nil];
 
-    NSURL* srcURL = [NSURL fileURLWithPath:src];
+    NSURL* srcURL = asset.URL;
     AudioFileTypeID fileType = [self _fileTypeForURL:srcURL];
 
     AVAssetExportSessionStatus status;
@@ -186,26 +145,17 @@ supportedForSession:(AVAssetExportSession*)session
         case kAudioFileMPEG4Type:
             // if the file is already mpeg-4, don't convert
             // instead, just copy file to output path
-            if ([fm copyItemAtPath:src
-                            toPath:dest
-                             error:error] == YES) {
-                // copy failed, import cannot continue
+            if ([fm copyItemAtURL:srcURL
+                            toURL:[NSURL fileURLWithPath:dest]
+                            error:error] == YES) {
                 status = AVAssetExportSessionStatusCompleted;
-
-                // now get the file metadata if the user needs it
-                if (mdout != NULL) {
-                    NSURL* destURL = [NSURL fileURLWithPath:dest];
-                    AVAsset* asset = [AVAsset assetWithURL:destURL];
-                    *mdout = [self _metadataForAsset:asset];
-                }
             }
             break;
         default: {
             // perform the conversion synchronously
-            status = [self _convertFile:srcURL
-                                 outURL:[NSURL fileURLWithPath:dest]
-                             outputType:AVFileTypeAppleM4A
-                               metadata:mdout];
+            status = [self _convertAsset:asset
+                                  outURL:[NSURL fileURLWithPath:dest]
+                              outputType:AVFileTypeAppleM4A];
         } break;
     }
 

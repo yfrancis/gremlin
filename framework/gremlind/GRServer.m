@@ -107,8 +107,7 @@ GRS_createLocalMessagePort(void* server)
 
 static void
 GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
-                                       Boolean success,
-                                       CFErrorRef error)
+                                       Boolean success)
 {
     SInt32 apiVersion = 0;
     CFNumberRef apiNum = CFDictionaryGetValue(info, CFSTR("apiVersion"));
@@ -138,7 +137,7 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
 
         // clients using apiVersion > 2 expect a dictionary
         data = CFPropertyListCreateData(kCFAllocatorDefault,
-                                        dict,
+                                        info,
                                         kCFPropertyListBinaryFormat_v1_0,
                                         0,
                                         NULL);
@@ -207,12 +206,12 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
             return;
        
         // generate a GRTask to represent this import request
-        GRTask* task = [GRTask taskWithUUID:uuid
-                                       path:filePath
-                                     client:client
-                                 apiVersion:apiVersion
-                                  mediaKind:mediaKind
-                                destination:destination];
+        GRTask* task = [GRTask taskForUUID:uuid
+                                      path:filePath
+                                    client:client
+                                apiVersion:apiVersion
+                                 mediaKind:mediaKind
+                              destination:destination];
 
         [importDelegate importTask:task];
     }];
@@ -225,8 +224,10 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
     NSDictionary* info = [task info];
 
     if (error.userInfo != nil) {
-        info = [NSMutableDictionary dictionaryWithDictionary:info];
-        [info setObject:error.userInfo forKey:@"error_info"];
+        NSMutableDictionary* tmp;
+        tmp = [NSMutableDictionary dictionaryWithDictionary:info];
+        [tmp setObject:error.userInfo forKey:@"error_info"];
+        info = tmp;
     }
 
     GRS_sendImportCompletionStatusWithInfo((CFDictionaryRef)info,

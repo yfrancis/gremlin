@@ -5,6 +5,7 @@
 @interface GRiTunesImportHelper
 
 + (BOOL)importAudioFileAtPath:(NSString*)path
+                    mediaKind:(NSString*)mediaKind
 				 withMetadata:(NSDictionary*)info;
 
 @end
