@@ -29,10 +29,16 @@ int main(int argc, const char **argv, char **envp)
         
         NSString* path = [NSString stringWithUTF8String:argv[1]];
         NSString* destination, * mediaKind = nil;
+        NSDictionary* metadata = nil;
         if (argc >= 3) {
             destination = [NSString stringWithUTF8String:argv[2]];
-            if (argc == 4)
+            if (argc >= 4) {
                 mediaKind = [NSString stringWithUTF8String:argv[3]];
+                if (argc == 5) {
+                    NSString* mdp = [NSString stringWithUTF8String:argv[4]];
+                    metadata = [NSDictionary dictionaryWithContentsOfFile:mdp];
+                }
+            }
         }
 
         NSMutableDictionary* info = [NSMutableDictionary dictionary];
@@ -41,6 +47,8 @@ int main(int argc, const char **argv, char **envp)
             [info setObject:destination forKey:@"destination"];
         if (mediaKind != nil)
             [info setObject:mediaKind forKey:@"mediaKind"];
+        if (metadata != nil)
+            [info setObject:metadata forKey:@"metadata"];
 
         NSLog(@"gimport: importing %@", info);
 

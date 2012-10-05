@@ -21,10 +21,14 @@
                                             toPath:npath
                                              error:nil];
 
+    SSDownloadMetadata* mtd;
+    mtd = [[SSDownloadMetadata alloc] initWithKind:mediaKind];
+
     // podcast handling
     if ([mediaKind isEqualToString:@"podcast"] ||
         [mediaKind isEqualToString:@"videoPodcast"]) {
-        
+        NSURL* fURL = [NSURL URLWithString:[info objectForKey:@"podcastURL"]];
+        [mtd setPodcastFeedURL:fURL];
     }
     else {
         // songs + movies + tv shows
@@ -32,27 +36,36 @@
         
         }
         else if ([mediaKind isEqualToString:@"feature-movie"]) {
-
+ 
         }
         else if ([mediaKind isEqualToString:@"tv-episode"]) {
+            NSNumber* sNum = [info objectForKey:@"seasonNumber"];
+            [mtd setSeasonNumber:sNum];
+            [mtd setSeriesName:[info objectForKey:@"seriesName"]];
 
+            // TODO: figure out how to set episode number
         }
     }
 
-    SSDownloadMetadata* mtd;
-    mtd = [[SSDownloadMetadata alloc] initWithKind:mediaKind];
     [mtd setPrimaryAssetURL:[NSURL fileURLWithPath:npath]];
 
     double duration = [[info objectForKey:@"duration"] doubleValue];
     NSNumber* duration_num = [NSNumber numberWithUnsignedLongLong:duration];
 
+    // implementation-specific metadata
     [mtd setDurationInMilliseconds:duration_num];
     [mtd setArtworkIsPrerendered:NO];
 
+    // core metadata
     [mtd setTitle:[info objectForKey:@"title"]];
     [mtd setArtistName:[info objectForKey:@"artist"]];
     [mtd setCollectionName:[info objectForKey:@"albumName"]];
     [mtd setGenre:[info objectForKey:@"type"]];
+    [mtd setReleaseYear:[info objectForKey:@"year"]];
+
+    // descriptions
+    [mtd setShortDescription:[info objectForKey:@"shortDescription"]];
+    [mtd setLongDescription:[info objectForKey:@"longDescription"]];
 
     NSData* imageData = [info objectForKey:@"imageData"];
     if (imageData != nil) {

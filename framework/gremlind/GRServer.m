@@ -109,6 +109,9 @@ static void
 GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
                                        Boolean success)
 {
+    if (info == NULL)
+        return;
+
     SInt32 apiVersion = 0;
     CFNumberRef apiNum = CFDictionaryGetValue(info, CFSTR("apiVersion"));
     if (apiNum != NULL)
@@ -125,11 +128,13 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
         // determine msgid
         msgid = (success == true) ? GREMLIN_SUCC_LEGACY : GREMLIN_FAIL_LEGACY;
 
-        // clients using old API expect only a path
-        data = CFStringCreateExternalRepresentation(kCFAllocatorDefault,
-                                                    path,
-                                                    kCFStringEncodingUTF8,
-                                                    0);
+        if (path != NULL) {
+            // clients using old API expect only a path
+            data = CFStringCreateExternalRepresentation(kCFAllocatorDefault,
+                                                        path,
+                                                        kCFStringEncodingUTF8,
+                                                        0);
+        }
     }
     else {
         // determine msgid for new API
@@ -189,31 +194,28 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
     NSLog(@"_handleImportRequest: %@", info);
 
     NSString* client = [info objectForKey:@"center"];
-    NSArray* files = [info objectForKey:@"import"];
     NSInteger apiVersion = [[info objectForKey:@"apiVersion"] integerValue];
-
-    [files enumerateObjectsUsingBlock:^(id file, NSUInteger idx, BOOL* stop) {
-        NSString* uuid, * filePath, * mediaKind, * destination = nil;
-        if ([file isKindOfClass:[NSDictionary class]]) {
-            uuid = [file objectForKey:@"uuid"];
-            filePath = [file objectForKey:@"path"];
-            mediaKind = [file objectForKey:@"mediaKind"];
-            destination = [file objectForKey:@"destination"];
+    NSArray* files = [info objectForKey:@"import"];
+    
+    [files enumerateObjectsUsingBlock:^(id info, NSUInteger idx, BOOL* stop) {
+        GRTask* task = nil;
+        if ([info isKindOfClass:[NSDictionary class]]) {
+            task = [GRTask taskWithInfo:(NSDictionary*)info];
+            task.client = client;
+            task.apiVersion = apiVersion;
         }
-        else if ([file isKindOfClass:[NSString class]])
-            filePath = file;
-        else
-            return;
+        else if ([info isKindOfClass:[NSString class]]) {
+            task = [GRTask taskForUUID:nil
+                                  path:(NSString*)info
+                                client:client
+                            apiVersion:apiVersion
+                             mediaKind:nil
+                           destination:nil
+                              metadata:nil];
+        }
        
-        // generate a GRTask to represent this import request
-        GRTask* task = [GRTask taskForUUID:uuid
-                                      path:filePath
-                                    client:client
-                                apiVersion:apiVersion
-                                 mediaKind:mediaKind
-                              destination:destination];
-
-        [importDelegate importTask:task];
+        if (task != nil)
+            [importDelegate importTask:task];
     }];
 }
 

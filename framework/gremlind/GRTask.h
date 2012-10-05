@@ -10,6 +10,7 @@
 @property (assign) NSInteger apiVersion;
 @property (retain) NSString* mediaKind;
 @property (retain) NSString* destination;
+@property (retain) NSDictionary* metadata;
 
 - (NSDictionary*)info;
 + (GRTask*)taskWithInfo:(NSDictionary*)info;
@@ -18,6 +19,7 @@
                 client:(NSString*)client
             apiVersion:(NSInteger)apiVersion
              mediaKind:(NSString*)mediaKind
-           destination:(NSString*)destination;
+           destination:(NSString*)destination
+              metadata:(NSDictionary*)metadata;
 
 @end

@@ -7,7 +7,8 @@
     client = client_, 
     apiVersion = apiVersion_,
     mediaKind = mediaKind_,
-    destination = destination_;
+    destination = destination_,
+    metadata = metadata_;
 
 + (NSString*)getUUID
 {
@@ -34,6 +35,9 @@
     
     if (destination_ != nil)
         [temp setObject:destination_ forKey:@"destination"];
+
+    if (metadata_ != nil)
+        [temp setObject:metadata_ forKey:@"metadata"];
    
     return [[temp copy] autorelease];
 }
@@ -44,6 +48,7 @@
          apiVersion:(NSInteger)apiVersion
           mediaKind:(NSString*)mediaKind
         destination:(NSString*)destination
+           metadata:(NSDictionary*)metadata
 {
     self = [super init];
     if (self != nil) {
@@ -53,6 +58,7 @@
         self.apiVersion = apiVersion;
         self.mediaKind = mediaKind;
         self.destination = destination;
+        self.metadata = metadata;
     }
     return self;
 }
@@ -64,7 +70,8 @@
                         client:[info objectForKey:@"client"]
                     apiVersion:[[info objectForKey:@"apiVersion"] integerValue]
                      mediaKind:[info objectForKey:@"mediaKind"]
-                   destination:[info objectForKey:@"destination"]];
+                   destination:[info objectForKey:@"destination"]
+                      metadata:[info objectForKey:@"metadata"]];
 }
 
 + (GRTask*)taskForUUID:(NSString*)uuid
@@ -73,13 +80,15 @@
             apiVersion:(NSInteger)apiVersion
              mediaKind:(NSString*)mediaKind
            destination:(NSString*)destination
+              metadata:(NSDictionary*)metadata
 {
     return [[[GRTask alloc] _initWithUUID:uuid
                                      path:path 
                                    client:client
                                apiVersion:apiVersion
                                 mediaKind:mediaKind
-                              destination:destination] autorelease];
+                              destination:destination
+                                 metadata:metadata] autorelease];
 }
 
 - (void)dealloc
@@ -89,6 +98,7 @@
     self.client = nil;
     self.mediaKind = nil;
     self.destination = nil;
+    self.metadata = nil;
     [super dealloc];
 }
 @end

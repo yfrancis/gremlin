@@ -13,6 +13,13 @@
 - (void)setGenre:(NSString*)g;
 - (void)setPrimaryAssetURL:(NSURL*)u;
 - (void)setFullSizeImageURL:(NSURL*)u;
+- (void)setReleaseYear:(NSNumber*)releaseYear;
+- (void)setSeriesName:(NSString*)name;
+- (void)setSeasonNumber:(NSNumber*)number;
+- (void)setPurchaseDate:(NSDate*)date;
+- (void)setPodcastFeedURL:(NSURL*)url;
+- (void)setShortDescription:(NSString*)shortDescription;
+- (void)setLongDescription:(NSString*)LongDescription;
 @end
 
 @interface SSDownload : NSObject

@@ -40,6 +40,9 @@
 
 + (NSDictionary*)_metadataForAsset:(AVAsset*)asset
 {
+    if (asset == nil)
+        return nil;
+
     NSMutableDictionary* dict = [NSMutableDictionary dictionary];
 
     // scan common metadata keys
@@ -66,10 +69,47 @@
     // we also need the duration in ms
     CMTime duration = asset.duration;
     uint64_t ms = CMTimeGetSeconds(duration) * 1000;
-    [dict setObject:[NSNumber numberWithUnsignedLongLong:ms]
-        forKey:@"duration"];
+    if (ms > 0)
+        [dict setObject:[NSNumber numberWithUnsignedLongLong:ms]
+                 forKey:@"duration"];
     
     return dict;
+}
+
++ (NSDictionary*)_outputMetadataForAsset:(AVAsset*)asset
+                                userData:(NSDictionary*)user
+{
+    // no user info provided, return metdata from file
+    if (user == nil) {
+        return [self _metadataForAsset:asset];
+    }
+    else {
+        // if client does not want us to merge metadata
+        if ([[user objectForKey:@"merge"] boolValue] == NO)
+            return user;
+        else {
+            // otherwise client wants us to combine the
+            // user-provided metadata with the data on
+            // disk, with priority given to the user data
+            NSMutableDictionary* outDict = nil;
+
+            // first see if there's anything on disk to merge
+            NSDictionary* dmd = [self _metadataForAsset:asset];
+            if (dmd.count > 0)
+                outDict = [NSMutableDictionary dictionaryWithDictionary:dmd];
+            else
+                outDict = [NSMutableDictionary dictionary];
+
+            // now apply all key-value pairs from user dict onto whatever
+            // outDict is, we don't care if the key already exists, user
+            // data always takes priority (i.e. if the user doesn't want
+            // to override a key they should not provide a value for it)
+            for (NSString* key in user)
+                [outDict setObject:[user objectForKey:key] forKey:key];
+
+            return outDict;
+        }
+    }
 }
 
 + (GRImportOperationBlock)newImportBlock
@@ -84,7 +124,20 @@
 
         NSURL* iURL = [NSURL fileURLWithPath:ipath];
         AVAsset* asset = [AVURLAsset assetWithURL:iURL];
-        NSDictionary* metadata = [self _metadataForAsset:asset];
+
+        NSDictionary* userMetadata = [info objectForKey:@"metadata"];
+        NSDictionary* metadata = [self _outputMetadataForAsset:asset
+                                                      userData:userMetadata];
+
+        if (metadata == nil) {
+            // if no metadata, we cannot import, bail out
+            NSLog(@"GRiTunesImporter: no metadata found for import: %@", info);
+            if (error != NULL)
+                *error = [NSError errorWithDomain:@"gremlin"
+                                             code:404
+                                         userInfo:info];
+            return NO;
+        }
 
         // create temp directory to house the processed file
         NSString* tempDir = [self _makeTemporaryDirectory];
@@ -115,7 +168,8 @@
         else if ([mediaKind isEqualToString:@"tv-episode"]) {
 
         }
-        else if ([mediaKind isEqualToString:@"podcast"]) {
+        else if ([mediaKind isEqualToString:@"podcast"] ||
+                 [mediaKind isEqualToString:@"videoPodcast"]) {
             // determine output path for copy
             NSString* fname;
             fname = [ipath lastPathComponent];
@@ -126,9 +180,6 @@
             status = [fm copyItemAtURL:iURL
                                  toURL:[NSURL fileURLWithPath:opath]
                                  error:error];
-        }
-        else if ([mediaKind isEqualToString:@"videoPodcast"]) {
-             
         }
 
         // if preprocessing was successful, attempt to import into itunes
