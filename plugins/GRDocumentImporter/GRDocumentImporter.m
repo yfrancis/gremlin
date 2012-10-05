@@ -1,9 +1,7 @@
 #import "GRImporterProtocol.h"
+#import "GRLaunchServices.h"
 
-#import <MobileCoreServices/LSApplicationWorkspace.h>
-#import <MobileCoreServices/LSApplicationProxy.h>
-#import <MobileCoreServices/LSDocumentProxy.h>
-#import <MobileCoreServices/LSOpenOperation.h>
+#include <objc/runtime.h>
 
 @interface GRDocumentImporter : NSObject <GRImporter>
 @end
@@ -31,7 +29,7 @@
 
         if (apps.count == 0) {
             if (err != NULL)
-                *err = [NSError errorWithDomain:@"gremlin.plugin.import"
+                *err = [NSError errorWithDomain:@"gremlin"
                                            code:404
                                        userInfo:info];
             return NO;

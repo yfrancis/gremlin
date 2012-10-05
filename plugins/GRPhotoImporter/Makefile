@@ -1,4 +1,5 @@
 TARGET = iphone:4.2
+TARGET_CXX = xcrun -sdk iphoneos clang++
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = GRPhotoImporter

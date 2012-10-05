@@ -54,6 +54,7 @@ int new_SBSLaunch(NSString* app,
 }
 
 %ctor {
-    MSHookFunction(SBSLaunchApplicationWithIdentifierAndURLAndLaunchOptions,
-                   new_SBSLaunch, &o_SBSLaunch);
+    MSHookFunction((void*)SBSLaunchApplicationWithIdentifierAndURLAndLaunchOptions,
+                   (void*)new_SBSLaunch, 
+                   (void**)&o_SBSLaunch);
 }
