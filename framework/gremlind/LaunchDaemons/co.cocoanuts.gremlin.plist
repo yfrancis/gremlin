@@ -16,7 +16,7 @@
 	</dict>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Library/Frameworks/Gremlin.framework/Support/gremlind</string>
+		<string>/Library/Frameworks/Gremlin.framework/Support.bundle/gremlind</string>
 	</array>
 	<key>UserName</key>
 	<string>mobile</string>

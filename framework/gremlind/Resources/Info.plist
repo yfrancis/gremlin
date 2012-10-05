@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>Gremlin</string>
+	<string>gremlind</string>
 	<key>CFBundleIdentifier</key>
-	<string>co.cocoanuts.gremlin</string>
+	<string>co.cocoanuts.gremlind</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
-	<string>FMWK</string>
+	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>3.0</string>
 	<key>CFBundleSignature</key>
