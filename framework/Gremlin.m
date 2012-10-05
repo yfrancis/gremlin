@@ -51,9 +51,6 @@ static NSMutableDictionary* localImports_ = nil;
     NSString* localPath = [localVersion objectForKey:@"path"];
     NSString* path = [info objectForKey:@"path"];
 
-    NSLog(@"incoming: %@", info);
-    NSLog(@"localVersion: %@", localVersion);
-
     if ([path isEqualToString:localPath]) {
         // remove from local imports
         [localImports_ removeObjectForKey:uuid];
