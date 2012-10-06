@@ -223,7 +223,8 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
                                  kCFRunLoopDefaultMode, 
                                  &response);
 
-        return (result == kCFMessagePortSuccess);
+        return (result == kCFMessagePortSuccess &&
+				response != NULL);
     }
 
     // if we couldn't get a server port, we should

@@ -1,3 +1,7 @@
+/*
+ * Created by Youssef Francis on September 26th, 2012.
+ */
+
 #import "GRServer.h"
 #import "GRIPCProtocol.h"
 
@@ -25,7 +29,8 @@ GRS_messageReceived(CFMessagePortRef local,
             if (dataLen == 0 || dataPtr == NULL)
                 return NULL;
 
-            CFDataRef data = CFDataCreate(kCFAllocatorDefault, dataPtr, dataLen-32);
+            CFDataRef data;
+			data = CFDataCreate(kCFAllocatorDefault, dataPtr, dataLen-32);
 
             if (data == NULL)
                 return NULL;
@@ -53,8 +58,11 @@ GRS_messageReceived(CFMessagePortRef local,
         CFRelease(info);
     }
 
+	// build a simple response packet
+	UInt8 result = 1;
+
     // receiver releases this data according to CFMessagePort spec
-    return CFRetain(completeData);
+	return CFDataCreate(kCFAllocatorDefault, &result, sizeof(char));
 }
 
 static void 
