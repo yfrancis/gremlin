@@ -1,0 +1,15 @@
+Package: co.cocoanuts.gremlinplugins
+Name: Gremlin Plugin Pack
+Pre-Depends: firmware (>= 4.2)
+Depends: co.cocoanuts.gremlin (>= 3.0), mobilesubstrate
+Version: 1.0
+Architecture: iphoneos-arm
+Description: iPod import &more
+   This plugin pack contains import plugins for
+   Music, Videos, Podcasts, Photos, Movies, TV-Shows,
+   Ringtones, PDFs and other Documents. Requires
+   Gremlin 3.0.
+Maintainer: CocoaNuts <support+gremlin@cocoanuts.co>
+Author: Youssef Francis
+Section: Multimedia
+Priority: optional

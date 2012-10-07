@@ -4,7 +4,7 @@ Pre-Depends: firmware (>= 4.2)
 Conflicts: gremlin, co.cocoanuts.gremlin2
 Provides: co.cocoanuts.gremlin2
 Replaces: co.cocoanuts.gremlin2
-Depends: mobilesubstrate, preferenceloader,
+Depends: co.cocoanuts.gremlinplugins, preferenceloader,
     firmware (<< 5.0) | com.chpwn.weeloader, 
     com.yfrancis.bugsense
 Version: 3.0

@@ -1,4 +1,4 @@
-TARGET = iphone:4.2
+export TARGET = iphone:4.2
 include $(THEOS)/makefiles/common.mk
 
 FRAMEWORK_NAME = Gremlin
