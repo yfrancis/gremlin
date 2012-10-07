@@ -120,6 +120,26 @@ supportedForSession:(AVAssetExportSession*)session
     return [session status];
 }
 
++ (BOOL)_assetIsVideo:(AVAsset*)asset
+{
+    // enumerate all tracks, if one with
+    // video mediaType is found, return YES
+    __block BOOL isVideo = NO;
+
+    NSArray* tracks = asset.tracks;
+    [tracks enumerateObjectsUsingBlock:^(AVAssetTrack* track,
+                                         NSUInteger idx,
+                                         BOOL* stop) {
+        if ([track.mediaType isEqualToString:AVMediaTypeVideo] ||
+            [track.mediaType isEqualToString:AVMediaTypeMuxed]) {
+            isVideo = YES;
+            *stop = YES;
+        }
+    }];
+
+    return isVideo;
+}
+
 + (BOOL)convertAsset:(AVURLAsset*)asset
                 dest:(NSString*)dest
                error:(NSError**)error
@@ -143,20 +163,25 @@ supportedForSession:(AVAssetExportSession*)session
             break;
         case kAudioFileM4AType:
         case kAudioFileMPEG4Type:
-            // if the file is already mpeg-4, don't convert
-            // instead, just copy file to output path
-            if ([fm copyItemAtURL:srcURL
-                            toURL:[NSURL fileURLWithPath:dest]
-                            error:error] == YES) {
-                status = AVAssetExportSessionStatusCompleted;
+            // first check if the original asset is a video,
+            // because we will have to demux it
+            if ([self _assetIsVideo:asset] == NO) { 
+                // if the file is already mpeg-4, don't convert
+                // instead, just copy file to output path
+                if ([fm copyItemAtURL:srcURL
+                                toURL:[NSURL fileURLWithPath:dest]
+                                error:error] == YES) {
+                    status = AVAssetExportSessionStatusCompleted;
+                }
+                break;
             }
-            break;
-        default: {
+            // if the asset is a video, continue to default case
+        default:
             // perform the conversion synchronously
             status = [self _convertAsset:asset
                                   outURL:[NSURL fileURLWithPath:dest]
                               outputType:AVFileTypeAppleM4A];
-        } break;
+            break;
     }
 
     return (status == AVAssetExportSessionStatusCompleted);

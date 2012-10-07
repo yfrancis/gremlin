@@ -12,20 +12,25 @@
 
 + (SSDownloadQueue*)downloadQueue
 {
-	static dispatch_once_t once;
-	static SSDownloadQueue* downloadQueue;
-	dispatch_once(&once, ^{
-	    NSArray* kinds = [SSDownloadQueue mediaDownloadKinds];
-    	downloadQueue = [[SSDownloadQueue alloc] initWithDownloadKinds:kinds];
-		[downloadQueue retain]; // Apple sends an extra release >_>
-	});
-	return downloadQueue;
+    static dispatch_once_t once;
+    static SSDownloadQueue* downloadQueue;
+    dispatch_once(&once, ^{
+        NSArray* kinds = [SSDownloadQueue mediaDownloadKinds];
+        downloadQueue = [[SSDownloadQueue alloc] initWithDownloadKinds:kinds];
+        [downloadQueue retain]; // Apple sends an extra release >_>
+    });
+    return downloadQueue;
 }
 
 + (BOOL)importAudioFileAtPath:(NSString*)path
                     mediaKind:(NSString*)mediaKind
                  withMetadata:(NSDictionary*)info
 {
+    // if the provided metadata does not at least contain a track
+    // then we should bail out quickly, as this is not supported
+    if ([[info objectForKey:@"title"] length] == 0)
+        return NO;
+    
     // we need to move the files into a sandbox-reachable dir
     NSString* filename = [path lastPathComponent];
     NSString* npath = [kDownloadsDir stringByAppendingPathComponent:filename];
@@ -90,7 +95,7 @@
     }
 
     SSDownload* dl = [[SSDownload alloc] initWithDownloadMetadata:mtd];
-	SSDownloadQueue* queue = [self downloadQueue];
+    SSDownloadQueue* queue = [self downloadQueue];
 
     [queue addDownload:dl];
 

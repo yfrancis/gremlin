@@ -161,22 +161,14 @@
                                                    dest:opath
                                                   error:error];
         }
-        // TODO: set up custom handling for each of these types
-        // where appropriate (some may not require it)
-        else if ([mediaKind isEqualToString:@"music-video"]) {
-
-        }
-        else if ([mediaKind isEqualToString:@"feature-movie"]) {
-
-        }
-        else if ([mediaKind isEqualToString:@"tv-episode"]) {
-
-        }
+        // TODO: use a supportedTypes dictionary for checks
         else if ([mediaKind isEqualToString:@"podcast"] ||
-                 [mediaKind isEqualToString:@"videoPodcast"]) {
+                 [mediaKind isEqualToString:@"videoPodcast"] ||
+                 [mediaKind isEqualToString:@"music-video"] ||
+                 [mediaKind isEqualToString:@"feature-movie"] ||
+                 [mediaKind isEqualToString:@"tv-episode"]) {
             // determine output path for copy
-            NSString* fname;
-            fname = [ipath lastPathComponent];
+            NSString* fname = [ipath lastPathComponent];
             opath = [tempDir stringByAppendingPathComponent:fname];
 
             // copy the file to temp
