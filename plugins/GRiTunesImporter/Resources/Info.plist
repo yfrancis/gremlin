@@ -21,7 +21,7 @@
 	<key>GRDestination</key>
 	<dict>
 		<key>GRDestinationName</key>
-		<string>com.apple.ipod</string>
+		<string>com.apple.mobileipod</string>
 		<key>GRDestinationPriority</key>
 		<integer>100</integer>
 	</dict>
