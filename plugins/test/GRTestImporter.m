@@ -1,5 +1,4 @@
 #import "GRImporterProtocol.h"
-#include <unistd.h>
 
 @interface GRTestImporter : NSObject <GRImporter>
 @end
