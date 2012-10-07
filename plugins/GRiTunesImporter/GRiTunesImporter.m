@@ -145,12 +145,16 @@
         // flag to indicate if preprocessing was successful
         BOOL status = NO;
 
-        if ([mediaKind isEqualToString:@"song"]) {
+        if ([mediaKind isEqualToString:@"song"] ||
+            [mediaKind isEqualToString:@"ringtone"]) {
             // determine output path for conversion (or plain copy)
             NSString* fname;
             fname = [[ipath lastPathComponent] stringByDeletingPathExtension];
+
+            BOOL isSong = [mediaKind isEqualToString:@"song"];
+            NSString* ext = isSong ? @"m4a" : @"m4r";
             opath = [[tempDir stringByAppendingPathComponent:fname]
-                        stringByAppendingPathExtension:@"m4a"];
+                        stringByAppendingPathExtension:ext];
 
             // perform the conversion
             status = [GRiTunesMP4Utilities convertAsset:asset
