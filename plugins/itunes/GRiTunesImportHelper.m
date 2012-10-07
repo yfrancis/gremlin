@@ -27,7 +27,9 @@
                  withMetadata:(NSDictionary*)info
 {
     // if the provided metadata does not at least contain a track
-    // then we should bail out quickly, as this is not supported
+    // then we should bail out quickly, as this is not a supported
+    // scenario (StoreServices will not choke, it'll instead just
+    // fail silently, which is far worse)
     if ([[info objectForKey:@"title"] length] == 0)
         return NO;
     
