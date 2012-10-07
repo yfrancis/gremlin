@@ -48,11 +48,13 @@
         [mediaKind isEqualToString:@"videoPodcast"]) {
         NSURL* fURL = [NSURL URLWithString:[info objectForKey:@"podcastURL"]];
         [mtd setPodcastFeedURL:fURL];
+        [mtd setIndexInCollection:[info objectForKey:@"episodeNumber"]];
+        [mtd setCollectionName:[info objectForKey:@"podcastName"]];
     }
     else {
         // songs + movies + tv shows
         if ([mediaKind isEqualToString:@"song"]) {
-        
+            [mtd setCollectionName:[info objectForKey:@"albumName"]];
         }
         else if ([mediaKind isEqualToString:@"feature-movie"]) {
  
@@ -61,8 +63,7 @@
             NSNumber* sNum = [info objectForKey:@"seasonNumber"];
             [mtd setSeasonNumber:sNum];
             [mtd setSeriesName:[info objectForKey:@"seriesName"]];
-
-            // TODO: figure out how to set episode number
+            [mtd setIndexInCollection:[info objectForKey:@"episodeNumber"]];
         }
     }
 
@@ -78,9 +79,9 @@
     // core metadata
     [mtd setTitle:[info objectForKey:@"title"]];
     [mtd setArtistName:[info objectForKey:@"artist"]];
-    [mtd setCollectionName:[info objectForKey:@"albumName"]];
     [mtd setGenre:[info objectForKey:@"type"]];
     [mtd setReleaseYear:[info objectForKey:@"year"]];
+    [mtd setPurchaseDate:[NSDate date]];
 
     // descriptions
     [mtd setShortDescription:[info objectForKey:@"shortDescription"]];
