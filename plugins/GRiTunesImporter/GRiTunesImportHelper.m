@@ -10,6 +10,18 @@
 
 @implementation GRiTunesImportHelper
 
++ (SSDownloadQueue*)downloadQueue
+{
+	static dispatch_once_t once;
+	static SSDownloadQueue* downloadQueue;
+	dispatch_once(&once, ^{
+	    NSArray* kinds = [SSDownloadQueue mediaDownloadKinds];
+    	downloadQueue = [[SSDownloadQueue alloc] initWithDownloadKinds:kinds];
+		[downloadQueue retain]; // Apple sends an extra release >_>
+	});
+	return downloadQueue;
+}
+
 + (BOOL)importAudioFileAtPath:(NSString*)path
                     mediaKind:(NSString*)mediaKind
                  withMetadata:(NSDictionary*)info
@@ -78,17 +90,14 @@
     }
 
     SSDownload* dl = [[SSDownload alloc] initWithDownloadMetadata:mtd];
-    NSArray* kinds = [SSDownloadQueue mediaDownloadKinds];
-    SSDownloadQueue* queue = [[SSDownloadQueue alloc] initWithDownloadKinds:kinds];
+	SSDownloadQueue* queue = [self downloadQueue];
 
     [queue addDownload:dl];
-    [queue release];
 
     NSConditionLock* dlLock = [[NSConditionLock alloc] initWithCondition:0];
 
     [dl setDownloadHandler:nil completionBlock:^{
         // how do we know if the download failed? look into this
-        NSLog(@"download complete?");
         [dlLock lock];
         [dlLock unlockWithCondition:1];
     }];
