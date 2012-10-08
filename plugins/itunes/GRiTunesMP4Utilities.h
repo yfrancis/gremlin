@@ -8,6 +8,7 @@
 
 + (BOOL)convertAsset:(AVAsset*)asset
                 dest:(NSString*)dest
+               range:(NSRange)range
                error:(NSError**)error;
 
 @end

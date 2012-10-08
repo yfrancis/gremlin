@@ -38,7 +38,7 @@
     return ret;
 }
 
-+ (NSDictionary*)_metadataForAsset:(AVAsset*)asset
++ (NSDictionary*)_metadataForAsset:(AVURLAsset*)asset
 {
     if (asset == nil)
         return nil;
@@ -72,11 +72,19 @@
     if (ms > 0)
         [dict setObject:[NSNumber numberWithUnsignedLongLong:ms]
                  forKey:@"duration"];
-    
+
+    // most basic requirement for metadata is a title
+    if ([[dict objectForKey:@"title"] length] == 0) {
+        NSString* path = [asset.URL absoluteString];
+        NSString* title = [[path lastPathComponent]
+                            stringByDeletingPathExtension]; 
+        [dict setObject:title forKey:@"title"];
+    }
+
     return dict;
 }
 
-+ (NSDictionary*)_outputMetadataForAsset:(AVAsset*)asset
++ (NSDictionary*)_outputMetadataForAsset:(AVURLAsset*)asset
                                 userData:(NSDictionary*)user
 {
     // no user info provided, return metdata from file
@@ -91,20 +99,15 @@
             // otherwise client wants us to combine the
             // user-provided metadata with the data on
             // disk, with priority given to the user data
-            NSMutableDictionary* outDict = nil;
-
-            // first see if there's anything on disk to merge
             NSDictionary* dmd = [self _metadataForAsset:asset];
-            if (dmd.count > 0)
-                outDict = [NSMutableDictionary dictionaryWithDictionary:dmd];
-            else
-                outDict = [NSMutableDictionary dictionary];
+            NSMutableDictionary* outDict = nil;
+            outDict = [NSMutableDictionary dictionaryWithDictionary:dmd];
 
             // now apply all key-value pairs from user dict onto whatever
             // outDict is, we don't care if the key already exists, user
             // data always takes priority (i.e. if the user doesn't want
             // to override a key they should not provide a value for it)
-            for (NSString* key in user)
+            for (NSString* key in [user allKeys])
                 [outDict setObject:[user objectForKey:key] forKey:key];
 
             return outDict;
@@ -123,7 +126,7 @@
             mediaKind = @"song";
 
         NSURL* iURL = [NSURL fileURLWithPath:ipath];
-        AVAsset* asset = [AVURLAsset assetWithURL:iURL];
+        AVURLAsset* asset = [AVURLAsset assetWithURL:iURL];
 
         NSDictionary* userMetadata = [info objectForKey:@"metadata"];
         NSDictionary* metadata = [self _outputMetadataForAsset:asset
@@ -156,9 +159,13 @@
             opath = [[tempDir stringByAppendingPathComponent:fname]
                         stringByAppendingPathExtension:ext];
 
+            NSString* rangeString = [metadata objectForKey:@"timeRange"];
+            NSRange range = NSRangeFromString(rangeString);
+
             // perform the conversion
             status = [GRiTunesMP4Utilities convertAsset:asset
                                                    dest:opath
+                                                  range:range
                                                   error:error];
         }
         // TODO: use a supportedTypes dictionary for checks

@@ -26,7 +26,7 @@ int main(int argc, const char **argv, char **envp)
     if (argc > 1) {
         [Gremlin haveGremlin];	
         [Gremlin registerNotifications:[Listener new]];
-        
+
         NSString* path = [NSString stringWithUTF8String:argv[1]];
         NSString* destination, * mediaKind = nil;
         NSDictionary* metadata = nil;

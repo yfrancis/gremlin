@@ -92,6 +92,7 @@ supportedForSession:(AVAssetExportSession*)session
 + (AVAssetExportSessionStatus)_convertAsset:(AVAsset*)asset
                                      outURL:(NSURL*)outURL
                                  outputType:(NSString*)outputType
+                                      range:(NSRange)range
 {
     AVAssetExportSession* session;
     NSString* preset = AVAssetExportPresetAppleM4A;
@@ -103,9 +104,61 @@ supportedForSession:(AVAssetExportSession*)session
     if (![self _fileOutput:outputType supportedForSession:session])
         return AVAssetExportSessionStatusFailed;
 
+    // if this asset has no audio tracks, we cannot continue
+    NSArray* tracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+    if ([tracks count] == 0)
+        return AVAssetExportSessionStatusFailed;
+
     session.outputFileType = AVFileTypeAppleM4A;
     session.outputURL = outURL;
     session.metadata = [self _translatedMetadataKeysForAsset:asset];
+
+    if (NSMaxRange(range) > 0) {
+        CMTime startTime = CMTimeMake((int64_t)floor(range.location), 1);
+        CMTime duration = CMTimeMake((int64_t)ceil(range.length), 1);
+        session.timeRange = CMTimeRangeMake(startTime, duration);
+
+        // create 500ms fade
+        CMTime fadeTime = CMTimeMake((int64_t)1, 3);
+        
+        // set up fade in
+        CMTime startFadeInTime = startTime;
+        CMTime endFadeInTime = CMTimeAdd(startFadeInTime, fadeTime);
+
+        CMTimeRange fadeInTimeRange;
+        fadeInTimeRange = CMTimeRangeFromTimeToTime(startFadeInTime,
+                                                    endFadeInTime);
+
+        // set up fade out
+        CMTime endFadeOutTime = CMTimeAdd(startTime, duration);
+        CMTime startFadeOutTime = CMTimeSubtract(endFadeOutTime, fadeTime);
+
+        CMTimeRange fadeOutTimeRange;
+        fadeOutTimeRange = CMTimeRangeFromTimeToTime(startFadeOutTime,
+                                                     endFadeOutTime);
+
+        // get the first audio track
+        AVAssetTrack* atrack = [tracks objectAtIndex:0];
+
+        // setup audio mix
+        AVMutableAudioMix* exportAudioMix = [AVMutableAudioMix audioMix];
+        AVMutableAudioMixInputParameters* inMix;
+        inMix = [AVMutableAudioMixInputParameters
+                    audioMixInputParametersWithTrack:atrack];
+        CMTime fst_ = CMTimeSubtract(startTime, CMTimeMakeWithSeconds(1, 1000));
+        [inMix setVolume:0.0 atTime:fst_];
+        [inMix setVolumeRampFromStartVolume:0.0
+                                toEndVolume:1.0
+                                  timeRange:fadeInTimeRange];
+        [inMix setVolumeRampFromStartVolume:1.0
+                                toEndVolume:0.0
+                                  timeRange:fadeOutTimeRange];
+
+        NSArray* mixParams = [NSArray arrayWithObject:inMix];
+        exportAudioMix.inputParameters = mixParams;
+        
+        session.audioMix = exportAudioMix;
+    }
 
     NSConditionLock* convLock = [[NSConditionLock alloc] initWithCondition:0];
     [session exportAsynchronouslyWithCompletionHandler:^{
@@ -142,6 +195,7 @@ supportedForSession:(AVAssetExportSession*)session
 
 + (BOOL)convertAsset:(AVURLAsset*)asset
                 dest:(NSString*)dest
+               range:(NSRange)range
                error:(NSError**)error
 {
     NSFileManager* fm = [NSFileManager defaultManager]; 
@@ -161,26 +215,27 @@ supportedForSession:(AVAssetExportSession*)session
                                              code:NSFileNoSuchFileError
                                          userInfo:nil];
             break;
-        case kAudioFileM4AType:
-        case kAudioFileMPEG4Type:
+        //case kAudioFileM4AType:
+        //case kAudioFileMPEG4Type:
             // first check if the original asset is a video,
             // because we will have to demux it
-            if ([self _assetIsVideo:asset] == NO) { 
+            //if ([self _assetIsVideo:asset] == NO) { 
                 // if the file is already mpeg-4, don't convert
                 // instead, just copy file to output path
-                if ([fm copyItemAtURL:srcURL
-                                toURL:[NSURL fileURLWithPath:dest]
-                                error:error] == YES) {
-                    status = AVAssetExportSessionStatusCompleted;
-                }
-                break;
-            }
+                //if ([fm copyItemAtURL:srcURL
+                //                toURL:[NSURL fileURLWithPath:dest]
+                //                error:error] == YES) {
+                //    status = AVAssetExportSessionStatusCompleted;
+                //}
+                //break;
+            //}
             // if the asset is a video, continue to default case
         default:
             // perform the conversion synchronously
             status = [self _convertAsset:asset
                                   outURL:[NSURL fileURLWithPath:dest]
-                              outputType:AVFileTypeAppleM4A];
+                              outputType:AVFileTypeAppleM4A
+                                   range:range];
             break;
     }
 
