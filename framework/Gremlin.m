@@ -5,7 +5,17 @@
 #import "Gremlin.h"
 #import "GRClient.h"
 
+#import "GRPluginScanner.h"
+
+#import "GRIPCProtocol.h"
+#import <AppSupport/CPDistributedMessagingCenter.h>
+
 #define kGremlinAPIVersion 2
+
+#define kManifestDir [NSHomeDirectory() stringByAppendingPathComponent: \
+                        @"Library/Gremlin"]
+#define kHistoryFile [kManifestDir stringByAppendingPathComponent: \
+						@"history.plist"]
 
 static id<GremlinListener> listener_ = nil;
 
@@ -162,6 +172,52 @@ static NSMutableDictionary* localImports_ = nil;
         return [Gremlin importFileWithInfo:info];
     }
     return NO;
+}
+
+#pragma mark Destinations
+
++ (NSArray*)allAvailableDestinations
+{
+	return [GRPluginScanner allAvailableDestinations];
+}
+
++ (NSArray*)availableDestinationsForFile:(NSString*)path
+{
+	return [GRPluginScanner availableDestinationsForFile:path];
+}
+
++ (GRDestination*)defaultDestinationForFile:(NSString*)path
+{
+	return [GRPluginScanner defaultDestinationForFile:path];
+}
+
+#pragma mark Manifest
+
++ (NSDictionary*)_getManifestType:(NSString*)type
+{
+    NSDictionary* ret = nil;
+    CPDistributedMessagingCenter* center;
+    NSString* centerName = @GRManifest_MessagePortName;
+    center = [CPDistributedMessagingCenter centerNamed:centerName];
+    if (center != nil) {
+        NSError* err = nil;
+        NSDictionary* info;
+        info = [NSDictionary dictionaryWithObject:type forKey:@"type"];
+        ret = [center sendMessageAndReceiveReplyName:@"getManifest"
+                                            userInfo:info
+                                               error:&err];
+    }
+    return ret;
+}
+
++ (NSArray*)getActiveTasks
+{
+    return [[self _getManifestType:@"active"] allValues];
+}
+
++ (NSArray*)getHistory
+{
+    return [NSArray arrayWithContentsOfFile:kHistoryFile];
 }
 
 @end

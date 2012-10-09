@@ -4,12 +4,40 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>jpeg</string>
+				<string>jpg</string>
+				<string>png</string>
+				<string>tiff</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>Image</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.jpeg</string>
+				<string>public.png</string>
+				<string>public.tiff</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>GRPhotoImporter</string>
 	<key>CFBundleIdentifier</key>
-	<string>co.cocoanuts.gremlin.GRPhotoImporter</string>
+	<string>co.cocoanuts.gremlinplugins.photos</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Camera Roll Photo Importer</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -18,26 +46,12 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
-	<key>GRDestination</key>
-	<dict>
-		<key>GRDestinationName</key>
-		<string>com.apple.mobileslideshow</string>
-		<key>GRDestinationPriority</key>
-		<integer>100</integer>
-	</dict>
+	<key>GRDestinationDisplayName</key>
+	<string>Camera Roll</string>
 	<key>GRRequiredResources</key>
 	<array>
 		<string>com.apple.photolibrary</string>
 	</array>
-	<key>GRSupportedTypes</key>
-	<dict>
-		<key>public.jpeg</key>
-		<integer>100</integer>
-		<key>public.png</key>
-		<integer>100</integer>
-		<key>public.tiff</key>
-		<integer>100</integer>
-	</dict>
 	<key>MinimumCFVersionNumber</key>
 	<string>550.52</string>
 	<key>NSPrincipalClass</key>

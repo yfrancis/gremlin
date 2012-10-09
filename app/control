@@ -1,0 +1,16 @@
+Package: co.cocoanuts.gremlinapp
+Name: Gremlin
+Depends: co.cocoanuts.gremlin, com.yfrancis.bugsense
+Version: 1.0
+Architecture: iphoneos-arm
+Description: Import your music, videos, photos &more!
+    Gremlin allows you to import your Photos,
+    Music, Videos, Ringtones, Contacts and
+    all file types supported by your installed
+    apps. Music and Videos go directly into
+    the iPod app and will even sync back to
+    your desktop iTunes!
+Maintainer: CocoaNuts <support+gremlin@cocoanuts.co>
+Author: Youssef Francis
+Section: Multimedia
+Priority: optional

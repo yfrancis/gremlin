@@ -4,12 +4,58 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>GRVideoImporter</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>3gp</string>
+				<string>3g2</string>
+				<string>3gp2</string>
+				<string>3gpp</string>
+				<string>3gpp2</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>3GP</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.3gpp</string>
+				<string>public.3gpp2</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mp4</string>
+				<string>mov</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>MPEG-4 video</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.mpeg-4</string>
+				<string>com.apple.quicktime-movie</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleIdentifier</key>
-	<string>co.cocoanuts.gremlin.GRVideoImporter</string>
+	<string>co.cocoanuts.gremlinplugins.videos</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Camera Roll Video Importer</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -18,26 +64,12 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
-	<key>GRDestination</key>
-	<dict>
-		<key>GRDestinationName</key>
-		<string>com.apple.mobileslideshow</string>
-		<key>GRDestinationPriority</key>
-		<integer>99</integer>
-	</dict>
+	<key>GRDestinationDisplayName</key>
+	<string>Camera Roll</string>
 	<key>GRRequiredResources</key>
 	<array>
 		<string>com.apple.photolibrary</string>
 	</array>
-	<key>GRSupportedTypes</key>
-	<dict>
-		<key>public.3gpp</key>
-		<integer>100</integer>
-		<key>public.3gpp2</key>
-		<integer>100</integer>
-		<key>public.mpeg-4</key>
-		<integer>2</integer>
-	</dict>
 	<key>MinimumCFVersionNumber</key>
 	<string>675.00</string>
 	<key>NSPrincipalClass</key>

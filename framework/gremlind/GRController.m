@@ -3,9 +3,12 @@
  */
 
 #import "GRController.h"
-#import "GRPluginManager.h"
 #import "GRTaskQueue.h"
 #import "GRManifest.h"
+
+#import "GRDestination+Import.h"
+
+#import <Gremlin/GRPluginScanner.h>
 
 @interface GRController (Private)
 - (void)_processImportCompletionForTask:(GRTask*)task
@@ -60,8 +63,6 @@
                                            status:NO
                                             error:error];
         }
-
-        [GRManifest clearManifest];
     }
     return self;
 }
@@ -114,21 +115,53 @@
 
 - (void)importTask:(GRTask*)task 
 {
-    // figure out what importer class to use and which
-    // resources it needs to acquire
-    NSArray* rsrc = nil;
-    Class<GRImporter> Importer;
-    Importer = [[GRPluginManager sharedManager] importerClassForTask:task 
-                                                   requiredResources:&rsrc];
-
+    // this is the completion block called in case
+    // of import success or failure, we may call
+    // this block ourselves here in some cases
     GRImportCompletionBlock complete;
     complete = ^(BOOL status, NSError* error) {
-        [GRManifest removeTask:task];
+        [GRManifest removeTask:task 
+                        status:status
+                         error:error];
 
         [self _processImportCompletionForTask:task
                                        status:status
                                         error:error];
     };
+
+    // figure out what importer class to use and which
+    // resources it needs to acquire
+    NSString* path = task.path;
+    NSArray* plugins = [GRPluginScanner availableDestinationsForFile:path];
+
+    if (plugins.count == 0) {
+        complete(NO, nil);
+        return;
+    }
+
+    NSString* taskDestination = task.destination;
+    GRDestination* chosenDestination = nil;
+    if (taskDestination != nil) {
+        // client has specified a destination here, we must honor it
+        for (GRDestination* dest in plugins) {
+            if ([dest.name isEqualToString:taskDestination]) {
+                chosenDestination = dest;
+                break;
+            }
+        }
+    }
+    else {
+        chosenDestination = [plugins objectAtIndex:0];
+    }
+
+    if (chosenDestination == nil) {
+        // chosen destination is not available, error
+        complete(NO, nil);
+        return;
+    }
+
+    NSArray* requiredResources = [chosenDestination resources];
+    Class<GRImporter> Importer = [chosenDestination importerClass];
 
     if (Importer == Nil) {
         complete(NO, nil);
@@ -141,7 +174,7 @@
     // queue the import task
     [[GRTaskQueue sharedQueue] addTask:task 
                               importer:Importer
-                             resources:rsrc
+                             resources:requiredResources
                        completionBlock:complete];
 }
 

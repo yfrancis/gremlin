@@ -7,9 +7,10 @@
 @interface GRManifest : NSObject
 
 + (void)addTask:(GRTask*)task;
-+ (void)removeTask:(GRTask*)task;
++ (void)removeTask:(GRTask*)task
+			status:(BOOL)status
+			 error:(NSError*)error;
 
 + (NSArray*)recoveredTasks;
-+ (void)clearManifest;
 
 @end

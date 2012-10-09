@@ -2,6 +2,7 @@
  * Created by Youssef Francis on September 26th, 2012.
  */
 
+#define GRManifest_MessagePortName "co.cocoanuts.gremlin.manifest"
 #define GRSBSupport_MessagePortName "co.cocoanuts.gremlin.sbsupport"
 #define gremlind_MessagePortName "co.cocoanuts.gremlin.center"
 

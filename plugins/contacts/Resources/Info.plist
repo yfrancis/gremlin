@@ -4,12 +4,36 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>vcf</string>
+				<string>vcard</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>vCard</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.vcard</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>GRContactImporter</string>
 	<key>CFBundleIdentifier</key>
-	<string>co.cocoanuts.gremlin.GRContactImporter</string>
+	<string>co.cocoanuts.gremlinplugins.contacts</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Contact Info Importer</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -18,15 +42,12 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+	<key>GRDestinationDisplayName</key>
+	<string>Contacts</string>
 	<key>GRRequiredResources</key>
 	<array>
 		<string>com.apple.addressbook</string>
 	</array>
-	<key>GRSupportedTypes</key>
-	<dict>
-		<key>public.vcard</key>
-		<integer>100</integer>
-	</dict>
 	<key>MinimumCFVersionNumber</key>
 	<string>550.52</string>
 	<key>NSPrincipalClass</key>

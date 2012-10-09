@@ -4,12 +4,86 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>GRiTunesImporter</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>m4a</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>MPEG-4 audio</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.m4a-audio</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mp3</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>MP3 audio</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.mp3</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>m4a</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>MPEG-4 ringtone</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.mpeg-4-ringtone</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mp4</string>
+				<string>mov</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>MPEG-4 video</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.mpeg-4</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleIdentifier</key>
-	<string>co.cocoanuts.gremlin.GRiTunesImporter</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
+	<string>co.cocoanuts.gremlinplugins.itunes</string>
+	<key>CFBundleName</key>
+	<string>iTunes Media Importer</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -18,29 +92,13 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
-	<key>GRDestination</key>
-	<dict>
-		<key>GRDestinationName</key>
-		<string>com.apple.mobileipod</string>
-		<key>GRDestinationPriority</key>
-		<integer>100</integer>
-	</dict>
+	<key>GRDestinationDisplayName</key>
+	<string>iTunes</string>
 	<key>GRRequiredResources</key>
 	<array>
-		<string>com.apple.ipod</string>
+		<string>com.apple.itunes</string>
 		<string>com.apple.coreaudio</string>
 	</array>
-	<key>GRSupportedTypes</key>
-	<dict>
-		<key>com.apple.m4a-audio</key>
-		<integer>100</integer>
-		<key>public.mp3</key>
-		<integer>100</integer>
-		<key>public.mpeg-4</key>
-		<integer>100</integer>
-		<key>public.mpeg-4-audio</key>
-		<integer>100</integer>
-	</dict>
 	<key>MinimumCFVersionNumber</key>
 	<integer>675</integer>
 	<key>NSPrincipalClass</key>

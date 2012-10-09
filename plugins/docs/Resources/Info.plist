@@ -4,12 +4,31 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>Data</string>
+			<key>CFBundleTypeRole</key>
+			<string>GRImporter</string>
+			<key>LSHandlerRank</key>
+			<string>None</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.data</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>GRDocumentImporter</string>
 	<key>CFBundleIdentifier</key>
-	<string>co.cocoanuts.gremlin.grdocumentimporter</string>
+	<string>co.cocoanuts.gremlinplugins.launchservices</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>LaunchServices Importer</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
@@ -18,15 +37,12 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+	<key>GRDestinationDisplayName</key>
+	<string>iOS Document Importer</string>
 	<key>GRRequiredResources</key>
 	<array>
-		<string>com.apple.LaunchServices</string>
+		<string>com.apple.launchservices</string>
 	</array>
-	<key>GRSupportedTypes</key>
-	<dict>
-		<key>GRSupportsAll</key>
-		<integer>1</integer>
-	</dict>
 	<key>MinimumCFVersionNumber</key>
 	<string>550.52</string>
 	<key>NSPrincipalClass</key>

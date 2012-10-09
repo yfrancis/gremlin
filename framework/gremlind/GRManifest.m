@@ -3,13 +3,17 @@
  */
 
 #import "GRManifest.h"
+#import "GRIPCProtocol.h"
+#import <AppSupport/CPDistributedMessagingCenter.h>
 
 #define kManifestDir [NSHomeDirectory() stringByAppendingPathComponent: \
                         @"Library/Gremlin"]
-#define kManifestFile [kManifestDir stringByAppendingPathComponent: \
-                        @"manifest.plist"]
+#define kActivityFile [kManifestDir stringByAppendingPathComponent: \
+                        @"activity.plist"]
+#define kHistoryFile [kManifestDir stringByAppendingPathComponent: \
+						@"history.plist"]
 
-static NSMutableDictionary* manifest_ = nil;
+static NSMutableDictionary* activity_ = nil;
 
 @implementation GRManifest
 
@@ -17,38 +21,69 @@ static NSMutableDictionary* manifest_ = nil;
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        manifest_ = [NSMutableDictionary new];
+        activity_ = [NSMutableDictionary new];
         [[NSFileManager defaultManager] createDirectoryAtPath:kManifestDir
                                   withIntermediateDirectories:NO
                                                    attributes:nil
                                                         error:nil];
+
+		CPDistributedMessagingCenter* center;
+		NSString* centerName = @GRManifest_MessagePortName;
+		center = [CPDistributedMessagingCenter centerNamed:centerName];
+		[center runServerOnCurrentThread];
+
+		[center registerForMessageName:@"getManifest"
+								target:self
+							  selector:@selector(_getManifest:userInfo:)];
+		[center retain];
     });
+}
+
+#pragma mark IPC
+
+- (NSDictionary*)_getManifest:(NSString*)msg userInfo:(NSDictionary*)info
+{
+	NSString* type = [info objectForKey:@"type"];
+	if ([type isEqualToString:@"active"])
+		return activity_;
+	return nil;
 }
 
 #pragma mark Persistence
 
 + (void)_synchronize
 {
-    [manifest_ writeToFile:kManifestFile
-                atomically:YES];
+    [activity_ writeToFile:kActivityFile atomically:YES];
 }
 
 + (void)addTask:(GRTask*)task
 {
-    @synchronized(manifest_) {
-        [manifest_ setObject:[task info]
-                      forKey:task.uuid];
-
+    @synchronized(activity_) {
+        [activity_ setObject:[task info] forKey:task.uuid];
         [self _synchronize];
     }
 }
 
 + (void)removeTask:(GRTask*)task
+			status:(BOOL)status
+			 error:(NSError*)error
 {
-    @synchronized(manifest_) {
-        [manifest_ removeObjectForKey:task.uuid];
+    @synchronized(activity_) {
+        [activity_ removeObjectForKey:task.uuid];
+			
+		NSMutableDictionary* info;
+		info = [NSMutableDictionary dictionaryWithDictionary:[task info]];
+		[info setObject:[NSNumber numberWithBool:status] forKey:@"status"];
 
-        [self _synchronize];
+		if (error != nil)
+			[info setObject:[error description] forKey:@"error"];
+	
+		NSMutableArray* history;
+		history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
+		[history addObject:info];
+		[history writeToFile:kHistoryFile atomically:YES];
+        
+		[self _synchronize];
     }
 }
 
@@ -57,14 +92,21 @@ static NSMutableDictionary* manifest_ = nil;
 + (NSArray*)recoveredTasks
 {
     NSDictionary* mfst;
-    mfst = [NSDictionary dictionaryWithContentsOfFile:kManifestFile];
-    return [mfst allValues];
-}
+    mfst = [NSDictionary dictionaryWithContentsOfFile:kActivityFile];
+	[[NSFileManager defaultManager] removeItemAtPath:kActivityFile error:nil];
+	
+	NSMutableArray* history;
+	history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
+	for (NSDictionary* info in [mfst allValues]) {
+		NSMutableDictionary* outInfo;
+		outInfo = [NSMutableDictionary dictionaryWithDictionary:info];
+		[outInfo setObject:[NSNumber numberWithBool:NO] forKey:@"status"];
+		[outInfo setObject:@"Gremlin server crashed" forKey:@"error"];
+		[history addObject:outInfo];
+	}
+	[history writeToFile:kHistoryFile atomically:YES];
 
-+ (void)clearManifest
-{
-    [[NSFileManager defaultManager] removeItemAtPath:kManifestFile
-                                               error:nil];
+	return [mfst allValues];
 }
 
 @end
