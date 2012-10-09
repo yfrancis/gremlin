@@ -87,20 +87,21 @@
 + (NSDictionary*)_outputMetadataForAsset:(AVURLAsset*)asset
                                 userData:(NSDictionary*)user
 {
+    NSMutableDictionary* outDict;
     // no user info provided, return metdata from file
     if (user == nil) {
-        return [self _metadataForAsset:asset];
+        outDict = [NSMutableDictionary dictionaryWithDictionary:
+                    [self _metadataForAsset:asset]];
     }
     else {
         // if client does not want us to merge metadata
-        if ([[user objectForKey:@"merge"] boolValue] == NO)
-            return user;
+        if ([[user objectForKey:@"replace"] boolValue] == YES)
+            outDict = [NSMutableDictionary dictionaryWithDictionary:user];
         else {
             // otherwise client wants us to combine the
             // user-provided metadata with the data on
             // disk, with priority given to the user data
             NSDictionary* dmd = [self _metadataForAsset:asset];
-            NSMutableDictionary* outDict = nil;
             outDict = [NSMutableDictionary dictionaryWithDictionary:dmd];
 
             // now apply all key-value pairs from user dict onto whatever
@@ -109,10 +110,17 @@
             // to override a key they should not provide a value for it)
             for (NSString* key in [user allKeys])
                 [outDict setObject:[user objectForKey:key] forKey:key];
-
-            return outDict;
         }
     }
+
+    // title is required, if one isn't provided, use the filename
+    if ([[outDict objectForKey:@"title"] length] == 0) {
+        NSString* filename = [[asset.URL absoluteString] lastPathComponent];
+        [outDict setObject:[filename stringByDeletingPathExtension]
+                    forKey:@"title"];
+    }
+
+    return outDict;
 }
 
 + (GRImportOperationBlock)newImportBlock
