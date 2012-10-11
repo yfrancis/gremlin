@@ -12,8 +12,8 @@ gremlind_PRIVATE_FRAMEWORKS = AppSupport
 gremlind_CFLAGS += -ggdb -I../ipc
 
 # Gremlin.framework
-gremlind_CFLAGS += -FFrameworks
-gremlind_LDFLAGS += -FFrameworks -framework Gremlin
+gremlind_CFLAGS += -F../.products
+gremlind_LDFLAGS += -F../.products -framework Gremlin
 
 include $(THEOS_MAKE_PATH)/tool.mk
 

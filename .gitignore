@@ -1,5 +1,3 @@
 .DS_Store
 _
 .theos
-include/GRBugSenseAPI.h
-core/Frameworks
