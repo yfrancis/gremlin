@@ -167,13 +167,20 @@
             opath = [[tempDir stringByAppendingPathComponent:fname]
                         stringByAppendingPathExtension:ext];
 
-            NSString* rangeString = [metadata objectForKey:@"timeRange"];
-            NSRange range = NSRangeFromString(rangeString);
+            CMTimeRange timeRange;
+            CFDictionaryRef rangeDict;
+            rangeDict = (CFDictionaryRef)[metadata objectForKey:@"timeRange"];
+            if (rangeDict != NULL) {
+                timeRange = CMTimeRangeMakeFromDictionary(rangeDict);
+            }
+            else {
+                timeRange = kCMTimeRangeZero;
+            }
 
             // perform the conversion
             status = [GRiTunesMP4Utilities convertAsset:asset
                                                    dest:opath
-                                                  range:range
+                                              timeRange:timeRange
                                                   error:error];
         }
         // TODO: use a supportedTypes dictionary for checks

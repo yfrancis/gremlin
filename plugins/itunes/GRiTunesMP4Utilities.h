@@ -8,7 +8,7 @@
 
 + (BOOL)convertAsset:(AVAsset*)asset
                 dest:(NSString*)dest
-               range:(NSRange)range
+           timeRange:(CMTimeRange)timeRange
                error:(NSError**)error;
 
 @end

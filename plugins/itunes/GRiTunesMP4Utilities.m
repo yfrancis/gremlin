@@ -92,7 +92,7 @@ supportedForSession:(AVAssetExportSession*)session
 + (AVAssetExportSessionStatus)_convertAsset:(AVAsset*)asset
                                      outURL:(NSURL*)outURL
                                  outputType:(NSString*)outputType
-                                      range:(NSRange)range
+                                  timeRange:(CMTimeRange)timeRange
 {
     AVAssetExportSession* session;
     NSString* preset = AVAssetExportPresetAppleM4A;
@@ -113,16 +113,19 @@ supportedForSession:(AVAssetExportSession*)session
     session.outputURL = outURL;
     session.metadata = [self _translatedMetadataKeysForAsset:asset];
 
-    if (NSMaxRange(range) > 0) {
-        CMTime startTime = CMTimeMake((int64_t)floor(range.location), 1);
-        CMTime duration = CMTimeMake((int64_t)ceil(range.length), 1);
-        session.timeRange = CMTimeRangeMake(startTime, duration);
+    if (!CMTimeRangeEqual(kCMTimeRangeZero, timeRange)) {
+		// client has specified a time range, first check
+		// if its valid and has definite bounds
+		if (CMTIMERANGE_IS_INDEFINITE(timeRange))
+			return AVAssetExportSessionStatusFailed;
 
-        // create 500ms fade
+        session.timeRange = timeRange;
+
+        // create 333ms fade
         CMTime fadeTime = CMTimeMake((int64_t)1, 3);
         
         // set up fade in
-        CMTime startFadeInTime = startTime;
+        CMTime startFadeInTime = timeRange.start;
         CMTime endFadeInTime = CMTimeAdd(startFadeInTime, fadeTime);
 
         CMTimeRange fadeInTimeRange;
@@ -130,7 +133,7 @@ supportedForSession:(AVAssetExportSession*)session
                                                     endFadeInTime);
 
         // set up fade out
-        CMTime endFadeOutTime = CMTimeAdd(startTime, duration);
+        CMTime endFadeOutTime = CMTimeAdd(timeRange.start, timeRange.duration);
         CMTime startFadeOutTime = CMTimeSubtract(endFadeOutTime, fadeTime);
 
         CMTimeRange fadeOutTimeRange;
@@ -145,7 +148,7 @@ supportedForSession:(AVAssetExportSession*)session
         AVMutableAudioMixInputParameters* inMix;
         inMix = [AVMutableAudioMixInputParameters
                     audioMixInputParametersWithTrack:atrack];
-        CMTime fst_ = CMTimeSubtract(startTime, CMTimeMakeWithSeconds(1, 1000));
+        CMTime fst_ = CMTimeSubtract(timeRange.start, CMTimeMakeWithSeconds(1, 1000));
         [inMix setVolume:0.0 atTime:fst_];
         [inMix setVolumeRampFromStartVolume:0.0
                                 toEndVolume:1.0
@@ -195,7 +198,7 @@ supportedForSession:(AVAssetExportSession*)session
 
 + (BOOL)convertAsset:(AVURLAsset*)asset
                 dest:(NSString*)dest
-               range:(NSRange)range
+           timeRange:(CMTimeRange)timeRange
                error:(NSError**)error
 {
     NSFileManager* fm = [NSFileManager defaultManager]; 
@@ -235,7 +238,7 @@ supportedForSession:(AVAssetExportSession*)session
             status = [self _convertAsset:asset
                                   outURL:[NSURL fileURLWithPath:dest]
                               outputType:AVFileTypeAppleM4A
-                                   range:range];
+							   timeRange:timeRange];
             break;
     }
 
