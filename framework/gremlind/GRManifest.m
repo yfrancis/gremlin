@@ -11,9 +11,10 @@
 #define kActivityFile [kManifestDir stringByAppendingPathComponent: \
                         @"activity.plist"]
 #define kHistoryFile [kManifestDir stringByAppendingPathComponent: \
-						@"history.plist"]
+                        @"history.plist"]
 
 static NSMutableDictionary* activity_ = nil;
+static CPDistributedMessagingCenter* center_ = nil;
 
 @implementation GRManifest
 
@@ -27,31 +28,30 @@ static NSMutableDictionary* activity_ = nil;
                                                    attributes:nil
                                                         error:nil];
 
-		CPDistributedMessagingCenter* center;
-		NSString* centerName = @GRManifest_MessagePortName;
-		center = [CPDistributedMessagingCenter centerNamed:centerName];
-		[center runServerOnCurrentThread];
+        NSString* centerName = @GRManifest_MessagePortName;
+        center_ = [CPDistributedMessagingCenter centerNamed:centerName];
+        [center_ runServerOnCurrentThread];
 
-		[center registerForMessageName:@"getManifest"
-								target:self
-							  selector:@selector(_getManifest:userInfo:)];
-		[center retain];
+        [center_ registerForMessageName:@"getManifest"
+                                 target:self
+                               selector:@selector(_getManifest:userInfo:)];
+        [center_ retain];
     });
 }
 
 #pragma mark IPC
 
-- (NSDictionary*)_getManifest:(NSString*)msg userInfo:(NSDictionary*)info
+- (NSDictionary*)getManifest:(NSString*)msg userInfo:(NSDictionary*)info
 {
-	NSString* type = [info objectForKey:@"type"];
-	if ([type isEqualToString:@"active"])
-		return activity_;
-	return nil;
+    NSString* type = [info objectForKey:@"type"];
+    if ([type isEqualToString:@"active"])
+        return activity_;
+    return nil;
 }
 
 #pragma mark Persistence
 
-+ (void)_synchronize
++ (void)synchronize
 {
     [activity_ writeToFile:kActivityFile atomically:YES];
 }
@@ -60,30 +60,30 @@ static NSMutableDictionary* activity_ = nil;
 {
     @synchronized(activity_) {
         [activity_ setObject:[task info] forKey:task.uuid];
-        [self _synchronize];
+        [self synchronize];
     }
 }
 
 + (void)removeTask:(GRTask*)task
-			status:(BOOL)status
-			 error:(NSError*)error
+            status:(BOOL)status
+             error:(NSError*)error
 {
     @synchronized(activity_) {
         [activity_ removeObjectForKey:task.uuid];
-			
-		NSMutableDictionary* info;
-		info = [NSMutableDictionary dictionaryWithDictionary:[task info]];
-		[info setObject:[NSNumber numberWithBool:status] forKey:@"status"];
+            
+        NSMutableDictionary* info;
+        info = [NSMutableDictionary dictionaryWithDictionary:[task info]];
+        [info setObject:[NSNumber numberWithBool:status] forKey:@"status"];
 
-		if (error != nil)
-			[info setObject:[error description] forKey:@"error"];
-	
-		NSMutableArray* history;
-		history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
-		[history addObject:info];
-		[history writeToFile:kHistoryFile atomically:YES];
+        if (error != nil)
+            [info setObject:[error description] forKey:@"error"];
+    
+        NSMutableArray* history;
+        history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
+        [history addObject:info];
+        [history writeToFile:kHistoryFile atomically:YES];
         
-		[self _synchronize];
+        [self synchronize];
     }
 }
 
@@ -93,20 +93,20 @@ static NSMutableDictionary* activity_ = nil;
 {
     NSDictionary* mfst;
     mfst = [NSDictionary dictionaryWithContentsOfFile:kActivityFile];
-	[[NSFileManager defaultManager] removeItemAtPath:kActivityFile error:nil];
-	
-	NSMutableArray* history;
-	history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
-	for (NSDictionary* info in [mfst allValues]) {
-		NSMutableDictionary* outInfo;
-		outInfo = [NSMutableDictionary dictionaryWithDictionary:info];
-		[outInfo setObject:[NSNumber numberWithBool:NO] forKey:@"status"];
-		[outInfo setObject:@"Gremlin server crashed" forKey:@"error"];
-		[history addObject:outInfo];
-	}
-	[history writeToFile:kHistoryFile atomically:YES];
+    [[NSFileManager defaultManager] removeItemAtPath:kActivityFile error:nil];
+    
+    NSMutableArray* history;
+    history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
+    for (NSDictionary* info in [mfst allValues]) {
+        NSMutableDictionary* outInfo;
+        outInfo = [NSMutableDictionary dictionaryWithDictionary:info];
+        [outInfo setObject:[NSNumber numberWithBool:NO] forKey:@"status"];
+        [outInfo setObject:@"Gremlin server crashed" forKey:@"error"];
+        [history addObject:outInfo];
+    }
+    [history writeToFile:kHistoryFile atomically:YES];
 
-	return [mfst allValues];
+    return [mfst allValues];
 }
 
 @end

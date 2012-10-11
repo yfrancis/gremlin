@@ -6,6 +6,6 @@
 
 + (BOOL)importAudioFileAtPath:(NSString*)path
                     mediaKind:(NSString*)mediaKind
-				 withMetadata:(NSDictionary*)info;
+                 withMetadata:(NSDictionary*)info;
 
 @end

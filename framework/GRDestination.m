@@ -16,7 +16,7 @@
 @implementation GRDestination
 @synthesize name, bundle, rank, resources;
 
-+ (NSArray*)_standardizedResourceArray:(NSArray*)ain
++ (NSArray*)standardizedResourceArray:(NSArray*)ain
 {
     NSMutableArray* tmp = [NSMutableArray array];
     
@@ -42,7 +42,7 @@
     d.name = [bundle objectForInfoDictionaryKey:kGRDestinationNameKey];
     
     NSArray* rsrc = [bundle objectForInfoDictionaryKey:kGRRequiredResourcesKey];
-    d.resources = [self _standardizedResourceArray:rsrc];
+    d.resources = [self standardizedResourceArray:rsrc];
     
     return [d autorelease];
 }

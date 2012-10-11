@@ -7,7 +7,7 @@
 static NSMutableDictionary* resources_ = nil;
 
 @interface GRResource (Private)
-- (id)_initWithName:(NSString*)name;
+- (id)initWithName:(NSString*)name;
 @end
 
 @implementation GRResource
@@ -20,19 +20,19 @@ static NSMutableDictionary* resources_ = nil;
     });
 }
 
-+ (GRResource*)_resourceWithName:(NSString*)name
++ (GRResource*)resourceWithName:(NSString*)name
 {
     @synchronized(resources_) {
         GRResource* r = [resources_ objectForKey:name];
         if (r == nil) {
-            r = [[[GRResource alloc] _initWithName:name] autorelease];
+            r = [[[GRResource alloc] initWithName:name] autorelease];
             [resources_ setObject:r forKey:name];
         }
         return r;
     }
 }
 
-- (id)_initWithName:(NSString*)name
+- (id)initWithName:(NSString*)name
 {
     self = [super init];
     if (self != nil)
@@ -43,13 +43,13 @@ static NSMutableDictionary* resources_ = nil;
 + (void)acquireResources:(NSArray*)resources
 {
     for (NSString* resourceName in resources)
-        [[GRResource _resourceWithName:resourceName] lock];
+        [[GRResource resourceWithName:resourceName] lock];
 }
 
 + (void)relinquishResources:(NSArray*)resources
 {
     for (NSString* resourceName in resources)
-        [[GRResource _resourceWithName:resourceName] unlock];
+        [[GRResource resourceWithName:resourceName] unlock];
 }
 
 @end

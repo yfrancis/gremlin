@@ -11,9 +11,9 @@
 #import <Gremlin/GRPluginScanner.h>
 
 @interface GRController (Private)
-- (void)_processImportCompletionForTask:(GRTask*)task
-                                 status:(BOOL)status
-                                  error:(NSError*)error;
+- (void)processImportCompletionForTask:(GRTask*)task
+                                status:(BOOL)status
+                                 error:(NSError*)error;
 @end
 
 @implementation GRController
@@ -59,9 +59,9 @@
 
         for (NSDictionary* info in recovered) {
             GRTask* task = [GRTask taskWithInfo:info];
-            [self _processImportCompletionForTask:task
-                                           status:NO
-                                            error:error];
+            [self processImportCompletionForTask:task
+                                          status:NO
+                                           error:error];
         }
     }
     return self;
@@ -104,7 +104,7 @@
     NSLog(@"server went idle, terminating");
 }
 
-- (void)_processImportCompletionForTask:(GRTask*)task
+- (void)processImportCompletionForTask:(GRTask*)task
                                  status:(BOOL)status
                                   error:(NSError*)error
 {
@@ -124,9 +124,9 @@
                         status:status
                          error:error];
 
-        [self _processImportCompletionForTask:task
-                                       status:status
-                                        error:error];
+        [self processImportCompletionForTask:task
+                                      status:status
+                                       error:error];
     };
 
     // figure out what importer class to use and which

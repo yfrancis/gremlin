@@ -15,15 +15,15 @@
 #define kManifestDir [NSHomeDirectory() stringByAppendingPathComponent: \
                         @"Library/Gremlin"]
 #define kHistoryFile [kManifestDir stringByAppendingPathComponent: \
-						@"history.plist"]
+                        @"history.plist"]
 
 static id<GremlinListener> listener_ = nil;
 
 @interface Gremlin (Private)
-+ (void)_handleGremlinServerDeath:(NSNotification*)notif;
-+ (void)_handleImportFailureWithInfo:(NSDictionary*)info;
-+ (void)_handleImportSuccessWithInfo:(NSDictionary*)info;
-+ (void)_updateTaskInfoForImports:(NSArray*)imports;
++ (void)handleGremlinServerDeath:(NSNotification*)notif;
++ (void)handleImportFailureWithInfo:(NSDictionary*)info;
++ (void)handleImportSuccessWithInfo:(NSDictionary*)info;
++ (void)updateTaskInfoForImports:(NSArray*)imports;
 @end
 
 static NSMutableDictionary* localImports_ = nil;
@@ -44,16 +44,16 @@ static NSMutableDictionary* localImports_ = nil;
     });
 }
 
-+ (void)_handleGremlinServerDeath:(NSNotification*)notif
++ (void)handleGremlinServerDeath:(NSNotification*)notif
 {
     if ([[notif name] isEqualToString:@"co.cocoanuts.gremlin.server.crash"]) {
         NSDictionary* info = [NSDictionary dictionaryWithObject:@"server.crash"
                                                          forKey:@"reason"];
-        [self _handleImportFailureWithInfo:info];
+        [self handleImportFailureWithInfo:info];
     }
 }
 
-+ (BOOL)_isValidTask:(NSDictionary*)info
++ (BOOL)isValidTask:(NSDictionary*)info
 {
     NSString* uuid = [info objectForKey:@"uuid"];
     NSDictionary* localVersion = [localImports_ objectForKey:uuid];
@@ -70,9 +70,9 @@ static NSMutableDictionary* localImports_ = nil;
     return NO;
 }
 
-+ (void)_handleImportFailureWithInfo:(NSDictionary*)info
++ (void)handleImportFailureWithInfo:(NSDictionary*)info
 {
-    if (![self _isValidTask:info])
+    if (![self isValidTask:info])
         return;
 
     SEL selector = @selector(gremlinImport:didFailWithError:);
@@ -88,9 +88,9 @@ static NSMutableDictionary* localImports_ = nil;
                         withObject:error];
 }
 
-+ (void)_handleImportSuccessWithInfo:(NSDictionary*)info
++ (void)handleImportSuccessWithInfo:(NSDictionary*)info
 {
-    if (![self _isValidTask:info])
+    if (![self isValidTask:info])
         return;
 
     SEL selector = @selector(gremlinImportWasSuccessful:); 
@@ -122,7 +122,7 @@ static NSMutableDictionary* localImports_ = nil;
     [[GRClient sharedClient] unregisterForNotifications];
 }
 
-+ (void)_updateTaskInfoForImports:(NSArray*)imports
++ (void)updateTaskInfoForImports:(NSArray*)imports
 {
     for (NSMutableDictionary* task in imports) {
         // generate uuid for task
@@ -144,7 +144,7 @@ static NSMutableDictionary* localImports_ = nil;
     NSMutableDictionary* dict = [NSMutableDictionary dictionary];
     
     // give each individual task a uuid
-    [self _updateTaskInfoForImports:files];
+    [self updateTaskInfoForImports:files];
 
     [dict setObject:files forKey:@"import"];
     [dict setObject:[NSNumber numberWithInt:kGremlinAPIVersion] 
@@ -178,22 +178,22 @@ static NSMutableDictionary* localImports_ = nil;
 
 + (NSArray*)allAvailableDestinations
 {
-	return [GRPluginScanner allAvailableDestinations];
+    return [GRPluginScanner allAvailableDestinations];
 }
 
 + (NSArray*)availableDestinationsForFile:(NSString*)path
 {
-	return [GRPluginScanner availableDestinationsForFile:path];
+    return [GRPluginScanner availableDestinationsForFile:path];
 }
 
 + (GRDestination*)defaultDestinationForFile:(NSString*)path
 {
-	return [GRPluginScanner defaultDestinationForFile:path];
+    return [GRPluginScanner defaultDestinationForFile:path];
 }
 
 #pragma mark Manifest
 
-+ (NSDictionary*)_getManifestType:(NSString*)type
++ (NSDictionary*)getManifestType:(NSString*)type
 {
     NSDictionary* ret = nil;
     CPDistributedMessagingCenter* center;
@@ -212,7 +212,7 @@ static NSMutableDictionary* localImports_ = nil;
 
 + (NSArray*)getActiveTasks
 {
-    return [[self _getManifestType:@"active"] allValues];
+    return [[self getManifestType:@"active"] allValues];
 }
 
 + (NSArray*)getHistory

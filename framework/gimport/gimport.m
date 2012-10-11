@@ -22,13 +22,15 @@
 int main(int argc, const char **argv, char **envp) 
 {
     NSAutoreleasePool* pool = [NSAutoreleasePool new];
-	
+    
     if (argc > 1) {
-        [Gremlin haveGremlin];	
-        [Gremlin registerNotifications:[Listener new]];
+        Listener* listener = [Listener new];
+
+        [Gremlin haveGremlin];  
+        [Gremlin registerNotifications:listener];
 
         NSString* path = [NSString stringWithUTF8String:argv[1]];
-        NSString* destination, * mediaKind = nil;
+        NSString* destination = nil, * mediaKind = nil;
         NSDictionary* metadata = nil;
         if (argc >= 3) {
             destination = [NSString stringWithUTF8String:argv[2]];
@@ -56,8 +58,10 @@ int main(int argc, const char **argv, char **envp)
             CFRunLoopRun();
         else
             NSLog(@"gimport: import request failed");
+
+        [listener release];
     }
-	
+    
     [pool drain];
     return 0;
 }

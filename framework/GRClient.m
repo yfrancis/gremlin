@@ -8,22 +8,22 @@
 #include <mach-o/dyld.h>
 
 @interface GRClient (Private)
-+ (BOOL)_portIsValid:(CFMessagePortRef)port;
-- (NSString*)_executableName;
-- (CFMessagePortRef)_serverPort;
-- (CFMessagePortRef)_localPort;
-- (void)_destroyLocalPort;
-- (CFDataRef)_createMessageWithInfo:(CFDictionaryRef)info;
-- (BOOL)_sendMessage:(CFDataRef)data;
++ (BOOL)portIsValid:(CFMessagePortRef)port;
+- (NSString*)executableName;
+- (CFMessagePortRef)serverPort;
+- (CFMessagePortRef)localPort;
+- (void)destroyLocalPort;
+- (CFDataRef)createMessageWithInfo:(CFDictionaryRef)info;
+- (BOOL)sendMessage:(CFDataRef)data;
 @end
 
 @protocol GRClientDelegate <NSObject>
-+ (void)_handleImportFailureWithInfo:(NSDictionary*)info;
-+ (void)_handleImportSuccessWithInfo:(NSDictionary*)info;
++ (void)handleImportFailureWithInfo:(NSDictionary*)info;
++ (void)handleImportSuccessWithInfo:(NSDictionary*)info;
 @end
 
 static CFDictionaryRef
-_GRC_createUnwrappedMessage(CFDataRef data)
+createUnwrappedMessage(CFDataRef data)
 {
     CFPropertyListRef info = NULL;
     if (data != NULL) {
@@ -37,23 +37,25 @@ _GRC_createUnwrappedMessage(CFDataRef data)
 }
 
 static CFDataRef 
-GRC_messageReceived(CFMessagePortRef local, 
-                    SInt32 msgid, 
-                    CFDataRef data, 
-                    void* info) 
+messageReceived(CFMessagePortRef local,
+                SInt32 msgid,
+                CFDataRef data,
+                void* info)
 {    
     Class<GRClientDelegate> delegate = (Class<GRClientDelegate>)info;
     
     switch (msgid) {
         case GREMLIN_SUCCESS: {
-                CFDictionaryRef dict = _GRC_createUnwrappedMessage(data);
-                [delegate _handleImportSuccessWithInfo:(NSDictionary*)dict];
-                CFRelease(dict);
+                CFDictionaryRef dict = createUnwrappedMessage(data);
+                [delegate handleImportSuccessWithInfo:(NSDictionary*)dict];
+                if (dict != NULL) 
+                    CFRelease(dict);
         } break;
         case GREMLIN_FAILURE: {
-                CFDictionaryRef dict = _GRC_createUnwrappedMessage(data);
-                [delegate _handleImportFailureWithInfo:(NSDictionary*)dict];
-                CFRelease(dict);
+                CFDictionaryRef dict = createUnwrappedMessage(data);
+                [delegate handleImportFailureWithInfo:(NSDictionary*)dict];
+                if (dict != NULL)
+                    CFRelease(dict);
         } break;
         default:
             break;
@@ -63,7 +65,7 @@ GRC_messageReceived(CFMessagePortRef local,
 }
 
 void 
-GRC_localPortInvalidated(CFMessagePortRef port, void*info)
+localPortInvalidated(CFMessagePortRef port, void*info)
 {
     // deallocate the port once it's been successfully
     // invalidated
@@ -71,7 +73,7 @@ GRC_localPortInvalidated(CFMessagePortRef port, void*info)
 }
 
 void 
-GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
+serverPortInvalidated(CFMessagePortRef port, void*info)
 {
     // looks like the server died (crashed), we should
     // inform the client. since we have no pointer to
@@ -96,7 +98,7 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
     return sharedClient;
 }
 
-+ (BOOL)_portIsValid:(CFMessagePortRef)port
++ (BOOL)portIsValid:(CFMessagePortRef)port
 {
     return (port != NULL &&
             CFMessagePortIsValid(port));
@@ -111,19 +113,19 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
 
         // our client is not in a bundle, get executable name instead
         if (bundleID == nil)
-            bundleID = [self _executableName];
+            bundleID = [self executableName];
 
         self.localPortName = [bundleID stringByAppendingString:@".gremlin"];
     }
     return self;
 }
 
-- (CFDataRef)_createMessageWithInfo:(CFDictionaryRef)info
+- (CFDataRef)newMessageWithInfo:(CFDictionaryRef)info
 {
     return CFPropertyListCreateXMLData(kCFAllocatorDefault, info);
 }
 
-- (NSString*)_executableName
+- (NSString*)executableName
 {
     char* path = malloc(1024*sizeof(char));
     uint32_t size = 1024;
@@ -140,7 +142,7 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
     return [execPath lastPathComponent];
 }
 
-- (void)_destroyLocalPort
+- (void)destroyLocalPort
 {
     if (local_port_ != NULL) {
         CFMessagePortInvalidate(local_port_);
@@ -148,18 +150,18 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
     }
 }
 
-- (CFMessagePortRef)_localPort
+- (CFMessagePortRef)localPort
 {
     if (local_port_ == NULL) {
         CFMessagePortContext context = {0, (void*)delegate_, NULL, NULL, NULL};
         local_port_ = CFMessagePortCreateLocal(NULL,
                                               (CFStringRef)localPortName_,
-                                              GRC_messageReceived,
+                                              messageReceived,
                                               &context, 
                                               NULL);
         
         CFMessagePortSetInvalidationCallBack(local_port_, 
-                                             GRC_localPortInvalidated);
+                                             localPortInvalidated);
         
         // if rl_source_ already exists, remove it from the runloop
         if (rl_source_ != NULL) {
@@ -179,10 +181,10 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
     return local_port_; 
 }
 
-- (CFMessagePortRef)_serverPort
+- (CFMessagePortRef)serverPort
 {
     // check if current server port is valid
-    if (![GRClient _portIsValid:server_port_]) {
+    if (![GRClient portIsValid:server_port_]) {
         if (server_port_ != NULL) 
             CFRelease(server_port_);
         
@@ -192,9 +194,9 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
         server_port_ = CFMessagePortCreateRemote(NULL, serverPortName);
         
         // if this attempt succeeds, set up the port
-        if ([GRClient _portIsValid:server_port_]) {
+        if ([GRClient portIsValid:server_port_]) {
             CFMessagePortSetInvalidationCallBack(server_port_,
-                                                 GRC_serverPortInvalidated);
+                                                 serverPortInvalidated);
         }
         else {
             // otherwise clean up and dont retry, if this method
@@ -209,22 +211,22 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
     return server_port_;
 }
 
-- (BOOL)_sendMessage:(CFDataRef)msg
+- (BOOL)sendMessage:(CFDataRef)msg
 {
-    CFMessagePortRef port = [self _serverPort];
+    CFMessagePortRef port = [self serverPort];
     if (port != NULL) {
         int result = 0;
         CFDataRef response = NULL;
-        result = CFMessagePortSendRequest(port, 
-                                 GREMLIN_IMPORT, 
-                                 msg, 
-                                 5, 
-                                 5, 
-                                 kCFRunLoopDefaultMode, 
-                                 &response);
+        result = CFMessagePortSendRequest(port,
+                                          GREMLIN_IMPORT,
+                                          msg,
+                                          5,
+                                          5,
+                                          kCFRunLoopDefaultMode,
+                                          &response);
 
         return (result == kCFMessagePortSuccess &&
-				response != NULL);
+                response != NULL);
     }
 
     // if we couldn't get a server port, we should
@@ -236,13 +238,13 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
 - (BOOL)registerForNotifications:(id)delegate
 {
     self.delegate = delegate;
-    return [GRClient _portIsValid:[self _localPort]];
+    return [GRClient portIsValid:[self localPort]];
 }
 
 - (void)unregisterForNotifications
 {
     self.delegate = nil;
-    [self _destroyLocalPort];
+    [self destroyLocalPort];
 }
 
 - (BOOL)sendServerMessage:(NSMutableDictionary*)msgInfo
@@ -254,9 +256,9 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
                     forKey:@"center"];
     }
 
-    CFDataRef msg = [self _createMessageWithInfo:(CFDictionaryRef)msgInfo];
+    CFDataRef msg = [self newMessageWithInfo:(CFDictionaryRef)msgInfo];
     if (msg != NULL) {
-        status = [self _sendMessage:msg];
+        status = [self sendMessage:msg];
         CFRelease(msg);
     }
 
@@ -265,7 +267,7 @@ GRC_serverPortInvalidated(CFMessagePortRef port, void*info)
 
 - (BOOL)haveGremlin
 {
-    return [GRClient _portIsValid:[self _serverPort]];
+    return [GRClient portIsValid:[self serverPort]];
 }
 
 @end

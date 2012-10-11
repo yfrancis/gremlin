@@ -16,7 +16,7 @@
 
 @implementation GRPluginScanner
 
-+ (BOOL)_pluginBundlePassesVersionCheck:(NSBundle*)bundle
++ (BOOL)pluginBundlePassesVersionCheck:(NSBundle*)bundle
 {
     // first check if plugin has strict version requirements
     NSArray* strict = [bundle objectForInfoDictionaryKey:
@@ -25,7 +25,7 @@
         NSNumber* currentVersion;
         currentVersion = [NSNumber numberWithFloat:
                           kCFCoreFoundationVersionNumber];
-        if ([strict containsObject:currentVersion] == NO)
+        if (![strict containsObject:currentVersion])
             return NO;
     }
     
@@ -44,9 +44,9 @@
     return YES;
 }
 
-+ (BOOL)_pluginBundle:(NSBundle*)bundle
-         supportsType:(const CFStringRef)type
-                 rank:(NSString**)rank
++ (BOOL)pluginBundle:(NSBundle*)bundle
+        supportsType:(const CFStringRef)type
+                rank:(NSString**)rank
 {
     // maybe use LS API from MobileCoreServices to do this?
     NSArray* types;
@@ -65,7 +65,7 @@
     return NO;
 }
 
-+ (const CFStringRef)_UTTypeForFile:(NSString*)file
++ (const CFStringRef)copyUTTypeForFile:(NSString*)file
 {
     CFStringRef extension = (CFStringRef)[file pathExtension];
     return UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
@@ -75,6 +75,8 @@
 
 + (NSArray*)availableDestinationsForFile:(NSString*)path
 {
+    const CFStringRef type = [self copyUTTypeForFile:path];
+    
     NSMutableArray* destinations = [NSMutableArray array];
     
     NSString* plugs = [[NSBundle mainBundle] pathForResource:kPluginDirectory
@@ -97,7 +99,7 @@
             NSBundle* bundle = [NSBundle bundleWithPath:fullPath];
             
             // check if this plugin is supported on this system version
-            if (![self _pluginBundlePassesVersionCheck:bundle])
+            if (![self pluginBundlePassesVersionCheck:bundle])
                 continue;
 
             // check if this plugin can handle this file type, if
@@ -105,8 +107,7 @@
             // available plugins on this system
             NSString* rank = nil;
             if (path != nil) {
-                const CFStringRef type = [self _UTTypeForFile:path];
-                if (![self _pluginBundle:bundle supportsType:type rank:&rank])
+                if (![self pluginBundle:bundle supportsType:type rank:&rank])
                     continue;
             }
             
@@ -119,10 +120,13 @@
             NSLog(@"Exception encountered while parsing '%@' plugin", plugin);
         }
     }
-        
+
     // sort the destinations by rank before returning them
     [destinations sortUsingSelector:@selector(compare:)];
     
+    if (type != NULL)
+        CFRelease(type);
+
     return destinations;
 }
 

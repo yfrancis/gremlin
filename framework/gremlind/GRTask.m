@@ -2,13 +2,13 @@
 
 @implementation GRTask
 @synthesize
-    uuid = uuid_,
-    path = path_, 
-    client = client_, 
-    apiVersion = apiVersion_,
-    mediaKind = mediaKind_,
-    destination = destination_,
-    metadata = metadata_;
+    uuid,
+    path,
+    client,
+    apiVersion,
+    mediaKind,
+    destination,
+    metadata;
 
 + (NSString*)getUUID
 {
@@ -21,46 +21,25 @@
 - (NSDictionary*)info
 {
     NSMutableDictionary* temp = [NSMutableDictionary dictionary];
-    [temp setObject:uuid_ forKey:@"uuid"];
-    [temp setObject:path_ forKey:@"path"];
+    [temp setObject:uuid forKey:@"uuid"];
+    [temp setObject:path forKey:@"path"];
     
-    if (client_ != nil) {
-        [temp setObject:client_ forKey:@"client"];
-        [temp setObject:[NSNumber numberWithInteger:apiVersion_]
+    if (client != nil) {
+        [temp setObject:client forKey:@"client"];
+        [temp setObject:[NSNumber numberWithInteger:apiVersion]
                  forKey:@"apiVersion"];
     }
 
-    if (mediaKind_ != nil)
-        [temp setObject:mediaKind_ forKey:@"mediaKind"];
+    if (mediaKind != nil)
+        [temp setObject:mediaKind forKey:@"mediaKind"];
     
-    if (destination_ != nil)
-        [temp setObject:destination_ forKey:@"destination"];
+    if (destination != nil)
+        [temp setObject:destination forKey:@"destination"];
 
-    if (metadata_ != nil)
-        [temp setObject:metadata_ forKey:@"metadata"];
+    if (metadata != nil)
+        [temp setObject:metadata forKey:@"metadata"];
    
     return [[temp copy] autorelease];
-}
-
-- (id)_initWithUUID:(NSString*)uuid
-               path:(NSString*)path
-             client:(NSString*)client
-         apiVersion:(NSInteger)apiVersion
-          mediaKind:(NSString*)mediaKind
-        destination:(NSString*)destination
-           metadata:(NSDictionary*)metadata
-{
-    self = [super init];
-    if (self != nil) {
-        self.uuid = (uuid != nil) ? uuid : [GRTask getUUID];
-        self.path = path;
-        self.client = client;
-        self.apiVersion = apiVersion;
-        self.mediaKind = mediaKind;
-        self.destination = destination;
-        self.metadata = metadata;
-    }
-    return self;
 }
 
 + (GRTask*)taskWithInfo:(NSDictionary*)info
@@ -82,13 +61,17 @@
            destination:(NSString*)destination
               metadata:(NSDictionary*)metadata
 {
-    return [[[GRTask alloc] _initWithUUID:uuid
-                                     path:path 
-                                   client:client
-                               apiVersion:apiVersion
-                                mediaKind:mediaKind
-                              destination:destination
-                                 metadata:metadata] autorelease];
+    GRTask* task = [GRTask new];
+    
+    task.uuid = (uuid != nil) ? uuid : [GRTask getUUID];
+    task.path = path;
+    task.client = client;
+    task.apiVersion = apiVersion;
+    task.mediaKind = mediaKind;
+    task.destination = destination;
+    task.metadata = metadata;
+
+    return [task autorelease];
 }
 
 - (void)dealloc

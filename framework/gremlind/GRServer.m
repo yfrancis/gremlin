@@ -6,34 +6,34 @@
 #import "GRIPCProtocol.h"
 
 @interface GRServer (Private)
-- (void)_handleImportRequest:(NSDictionary*)info;
+- (void)handleImportRequest:(NSDictionary*)info;
 @end
 
 static CFDataRef 
-GRS_messageReceived(CFMessagePortRef local,
-                    SInt32 msgid,
-                    CFDataRef completeData,
-                    void* server)
+messageReceived(CFMessagePortRef local,
+                SInt32 msgid,
+                CFDataRef completeData,
+                void* server)
 {
     CFPropertyListRef info = NULL;
 
     switch (msgid) {
         case GREMLIN_IMPORT_LEGACY: {
             if (completeData == NULL)
-                return NULL;
+                break;
 
             // API maintains backward-compatibility, but ignores digest
             int dataLen = CFDataGetLength(completeData);
             UInt8* dataPtr = (UInt8*)CFDataGetBytePtr(completeData);
 
             if (dataLen == 0 || dataPtr == NULL)
-                return NULL;
+                break;;
 
             CFDataRef data;
-			data = CFDataCreate(kCFAllocatorDefault, dataPtr, dataLen-32);
+            data = CFDataCreate(kCFAllocatorDefault, dataPtr, dataLen-32);
 
             if (data == NULL)
-                return NULL;
+                break;;
 
             // Reconstitute the dictionary using the XML data.
             info = CFPropertyListCreateFromXMLData(kCFAllocatorDefault,
@@ -54,56 +54,56 @@ GRS_messageReceived(CFMessagePortRef local,
     }
 
     if (info != NULL) {
-        [(id)server _handleImportRequest:(NSDictionary*)info];
+        [(id)server handleImportRequest:(NSDictionary*)info];
         CFRelease(info);
     }
-
-	// build a simple response packet
-	UInt8 result = 1;
-
-    // receiver releases this data according to CFMessagePort spec
-	return CFDataCreate(kCFAllocatorDefault, &result, sizeof(char));
+    
+    return NULL;
 }
 
 static void 
-GRS_portInvalidated(CFMessagePortRef port, void* info)
+portInvalidated(CFMessagePortRef port, void* info)
 {
     CFRelease(port);
 }
 
 static BOOL 
-GRS_portIsValid(CFMessagePortRef port)
+portIsValid(CFMessagePortRef port)
 {
     return (port != NULL && CFMessagePortIsValid(port));
 }
 
 static CFMessagePortRef 
-GRS_createRemoteMessagePortForClient(CFStringRef client)
+createRemoteMessagePortForClient(CFStringRef client)
 {
     if (client != NULL) {
         CFMessagePortRef port = CFMessagePortCreateRemote(NULL, client);
-        if (GRS_portIsValid(port) == YES) {
-            CFMessagePortSetInvalidationCallBack(port, GRS_portInvalidated);
+        if (portIsValid(port) == YES) {
+            CFMessagePortSetInvalidationCallBack(port, portInvalidated);
             return port;
+        }
+        else {
+            if (port != NULL)
+                CFRelease(port);
         }
     }
     return NULL;
 }
 
 static CFMessagePortRef 
-GRS_createLocalMessagePort(void* server)
+createLocalMessagePort(void* server)
 {
     CFStringRef localPortName = CFSTR(gremlind_MessagePortName);
     CFMessagePortContext context = {0, server, NULL, NULL, NULL};
     CFMessagePortRef local_port;
     local_port = CFMessagePortCreateLocal(NULL,
                                          localPortName,
-                                         GRS_messageReceived,
+                                         messageReceived,
                                          &context,
-                                         NULL);	
+                                         NULL); 
 
     CFMessagePortSetInvalidationCallBack(local_port, 
-                                         GRS_portInvalidated);
+                                         portInvalidated);
 
     CFRunLoopSourceRef source;
     source = CFMessagePortCreateRunLoopSource(NULL, local_port, 0);
@@ -114,7 +114,7 @@ GRS_createLocalMessagePort(void* server)
 }
 
 static void
-GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
+sendImportCompletionStatusWithInfo(CFDictionaryRef info,
                                        Boolean success)
 {
     if (info == NULL)
@@ -161,9 +161,9 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
 
     // create remote port to communicate with client
     CFMessagePortRef port;
-    port = GRS_createRemoteMessagePortForClient(client);
+    port = createRemoteMessagePortForClient(client);
 
-    if (GRS_portIsValid(port) == YES) {
+    if (portIsValid(port) == YES) {
         // transmit message to client
         CFMessagePortSendRequest(port, msgid, data, 0, 0, NULL, NULL);
         
@@ -197,10 +197,8 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
 - (id)retain { return self; }
 - (id)autorelease { return self; }
 
-- (void)_handleImportRequest:(NSDictionary*)info
+- (void)handleImportRequest:(NSDictionary*)info
 {
-    NSLog(@"_handleImportRequest: %@", info);
-
     NSString* client = [info objectForKey:@"center"];
     NSInteger apiVersion = [[info objectForKey:@"apiVersion"] integerValue];
     NSArray* files = [info objectForKey:@"import"];
@@ -240,14 +238,14 @@ GRS_sendImportCompletionStatusWithInfo(CFDictionaryRef info,
         info = tmp;
     }
 
-    GRS_sendImportCompletionStatusWithInfo((CFDictionaryRef)info,
-                                           (Boolean)status);
+    sendImportCompletionStatusWithInfo((CFDictionaryRef)info,
+                                       (Boolean)status);
 }
 
 - (BOOL)run
 {
     // set up a local port to listen for incoming import requests
-    return (GRS_createLocalMessagePort((void*)self) != NULL);
+    return (createLocalMessagePort((void*)self) != NULL);
 }
 
 @end

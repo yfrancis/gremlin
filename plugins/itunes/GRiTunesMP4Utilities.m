@@ -114,10 +114,10 @@ supportedForSession:(AVAssetExportSession*)session
     session.metadata = [self _translatedMetadataKeysForAsset:asset];
 
     if (!CMTimeRangeEqual(kCMTimeRangeZero, timeRange)) {
-		// client has specified a time range, first check
-		// if its valid and has definite bounds
-		if (CMTIMERANGE_IS_INDEFINITE(timeRange))
-			return AVAssetExportSessionStatusFailed;
+        // client has specified a time range, first check
+        // if its valid and has definite bounds
+        if (CMTIMERANGE_IS_INDEFINITE(timeRange))
+            return AVAssetExportSessionStatusFailed;
 
         session.timeRange = timeRange;
 
@@ -218,27 +218,12 @@ supportedForSession:(AVAssetExportSession*)session
                                              code:NSFileNoSuchFileError
                                          userInfo:nil];
             break;
-        //case kAudioFileM4AType:
-        //case kAudioFileMPEG4Type:
-            // first check if the original asset is a video,
-            // because we will have to demux it
-            //if ([self _assetIsVideo:asset] == NO) { 
-                // if the file is already mpeg-4, don't convert
-                // instead, just copy file to output path
-                //if ([fm copyItemAtURL:srcURL
-                //                toURL:[NSURL fileURLWithPath:dest]
-                //                error:error] == YES) {
-                //    status = AVAssetExportSessionStatusCompleted;
-                //}
-                //break;
-            //}
-            // if the asset is a video, continue to default case
         default:
             // perform the conversion synchronously
             status = [self _convertAsset:asset
                                   outURL:[NSURL fileURLWithPath:dest]
                               outputType:AVFileTypeAppleM4A
-							   timeRange:timeRange];
+                               timeRange:timeRange];
             break;
     }
 
