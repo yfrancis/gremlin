@@ -1,0 +1,3 @@
+[submodule "bugsense"]
+	path = bugsense
+	url = git://github.com/yfrancis/plcrashreporter-bugsense.git
