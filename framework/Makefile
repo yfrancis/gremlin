@@ -23,8 +23,8 @@ after-Gremlin-all::
 	$(ECHO_NOTHING)mkdir -p Resources/Headers$(ECHO_END)
 	$(ECHO_NOTHING)cp -pR include/* Resources/Headers/$(ECHO_END)
 	$(ECHO_NOTHING)mkdir -p $(FMWK_PATH_)$(ECHO_END)
-	$(ECHO_NOTHING)ln -s $(PROJECT_PATH_)/Resources/* $(FMWK_PATH_)/$(ECHO_END)
-	$(ECHO_NOTHING)ln -s $(THEOS_OBJ_DIR)/Gremlin $(BINARY_DEST_)$(ECHO_END)
+	$(ECHO_NOTHING)ln -Fs $(PROJECT_PATH_)/Resources/* $(FMWK_PATH_)/$(ECHO_END)
+	$(ECHO_NOTHING)cp $(THEOS_OBJ_DIR)/Gremlin $(BINARY_DEST_)$(ECHO_END)
 	$(ECHO_NOTHING)$(TARGET_STRIP) -cx $(BINARY_DEST_)$(ECHO_END)
 
 internal-clean::
