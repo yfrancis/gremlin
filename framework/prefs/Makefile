@@ -5,6 +5,7 @@ prefs_FILES = prefs.mm
 prefs_INSTALL_PATH = /Library/PreferenceBundles
 prefs_FRAMEWORKS = UIKit
 prefs_PRIVATE_FRAMEWORKS = Preferences
+prefs_CFLAGS += -Iinclude
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

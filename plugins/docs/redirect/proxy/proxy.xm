@@ -1,6 +1,10 @@
 #import <AppSupport/CPDistributedMessagingCenter.h>
 #define kCenterPrefix @"co.cocoanuts.GRDocumentImportProxy:"
 
+#ifndef GSEVENT_H
+typedef void* GSEventRef;
+#endif
+
 %hook UIApplication
 
 - (void)_applicationOpenURL:(id)url event:(GSEventRef)event {

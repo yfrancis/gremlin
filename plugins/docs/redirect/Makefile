@@ -3,6 +3,7 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = GRDocumentImportRedirect
 GRDocumentImportRedirect_FILES = redirect.xm
 GRDocumentImportRedirect_PRIVATE_FRAMEWORKS = AppSupport SpringBoardServices
+GRDocumentImportRedirect_CFLAGS += -Iinclude
 
 SUBPROJECTS = proxy
 
