@@ -1,5 +1,3 @@
-TARGET = iphone:4.2
-TARGET_CXX = xcrun -sdk iphoneos clang++
 TARGET_STRIP = ":"
 
 include $(THEOS)/makefiles/common.mk

@@ -1,4 +1,3 @@
-TARGET = iphone:4.2
 include $(THEOS)/makefiles/common.mk
 
 TOOL_NAME = gimport
