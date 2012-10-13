@@ -79,29 +79,28 @@
     
     NSMutableArray* destinations = [NSMutableArray array];
     
-    NSString* plugs = [[NSBundle mainBundle] pathForResource:kPluginDirectory
-                                                      ofType:nil];
-        
     NSError* err = nil;
     NSFileManager* fm = [NSFileManager defaultManager];
-    NSArray* plugins = [fm contentsOfDirectoryAtPath:plugs
+    NSArray* plugins = [fm contentsOfDirectoryAtPath:kPluginDirectory
                                                error:&err];
     
     if (plugins == nil || err != nil)
         return nil;
     
     for (NSString* plugin in plugins) {
+		NSLog(@"plugin: %@", plugin);
         // plugin parsing goes inside an exception block because
         // who knows how badly malformed a plugin might be
         @try {
             NSString* fullPath;
-            fullPath = [plugs stringByAppendingPathComponent:plugin];
+            fullPath = [kPluginDirectory stringByAppendingPathComponent:plugin];
             NSBundle* bundle = [NSBundle bundleWithPath:fullPath];
             
             // check if this plugin is supported on this system version
             if (![self pluginBundlePassesVersionCheck:bundle])
                 continue;
 
+			NSLog(@"%@ passed version check", plugin);
             // check if this plugin can handle this file type, if
             // path is passed as nil, we are just checking for all
             // available plugins on this system
@@ -110,6 +109,8 @@
                 if (![self pluginBundle:bundle supportsType:type rank:&rank])
                     continue;
             }
+			
+			NSLog(@"%@ passed support check, rank = %@", plugin, rank);
             
             // plugin passed all checks, add it to list of potential plugins
             GRDestination* destination;
@@ -126,6 +127,8 @@
     
     if (type != NULL)
         CFRelease(type);
+
+	NSLog(@"returning destinations: %@", destinations);
 
     return destinations;
 }
