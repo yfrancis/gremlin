@@ -216,17 +216,15 @@ serverPortInvalidated(CFMessagePortRef port, void*info)
     CFMessagePortRef port = [self serverPort];
     if (port != NULL) {
         int result = 0;
-        CFDataRef response = NULL;
         result = CFMessagePortSendRequest(port,
                                           GREMLIN_IMPORT,
                                           msg,
                                           5,
                                           5,
                                           kCFRunLoopDefaultMode,
-                                          &response);
+                                          NULL);
 
-        return (result == kCFMessagePortSuccess &&
-                response != NULL);
+        return (result == kCFMessagePortSuccess);
     }
 
     // if we couldn't get a server port, we should

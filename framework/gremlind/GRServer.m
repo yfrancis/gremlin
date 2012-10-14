@@ -27,13 +27,13 @@ messageReceived(CFMessagePortRef local,
             UInt8* dataPtr = (UInt8*)CFDataGetBytePtr(completeData);
 
             if (dataLen == 0 || dataPtr == NULL)
-                break;;
+                break;
 
             CFDataRef data;
             data = CFDataCreate(kCFAllocatorDefault, dataPtr, dataLen-32);
 
             if (data == NULL)
-                break;;
+                break;
 
             // Reconstitute the dictionary using the XML data.
             info = CFPropertyListCreateFromXMLData(kCFAllocatorDefault,
