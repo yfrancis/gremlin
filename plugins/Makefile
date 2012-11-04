@@ -9,6 +9,6 @@ export TARGET_CC = $(CC)
 
 include $(THEOS)/makefiles/common.mk
 
-SUBPROJECTS = contacts docs photos videos itunes
+SUBPROJECTS = contacts photos videos itunes
 
 include $(THEOS_MAKE_PATH)/aggregate.mk
