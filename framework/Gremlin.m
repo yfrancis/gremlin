@@ -4,11 +4,7 @@
 
 #import "Gremlin.h"
 #import "GRClient.h"
-
 #import "GRPluginScanner.h"
-
-#import "GRIPCProtocol.h"
-#import <AppSupport/CPDistributedMessagingCenter.h>
 
 #define kGremlinAPIVersion 2
 
@@ -193,31 +189,9 @@ static NSMutableDictionary* localImports_ = nil;
 
 #pragma mark Manifest
 
-+ (NSDictionary*)getManifestType:(NSString*)type
-{
-    NSDictionary* ret = nil;
-    CPDistributedMessagingCenter* center;
-    NSString* centerName = @GRManifest_MessagePortName;
-    center = [CPDistributedMessagingCenter centerNamed:centerName];
-    if (center != nil) {
-        NSError* err = nil;
-        NSDictionary* info;
-        info = [NSDictionary dictionaryWithObject:type forKey:@"type"];
-        ret = [center sendMessageAndReceiveReplyName:@"getManifest"
-                                            userInfo:info
-                                               error:&err];
-    }
-    return ret;
-}
-
-+ (NSArray*)getActiveTasks
-{
-    return [[self getManifestType:@"active"] allValues];
-}
-
 + (NSArray*)getHistory
 {
-    return [NSArray arrayWithContentsOfFile:kHistoryFile];
+    return [NSDictionary dictionaryWithContentsOfFile:kHistoryFile];
 }
 
 @end

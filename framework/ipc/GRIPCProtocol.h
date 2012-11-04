@@ -2,9 +2,12 @@
  * Created by Youssef Francis on September 26th, 2012.
  */
 
-#define GRManifest_MessagePortName "co.cocoanuts.gremlin.manifest"
+#define GRManifest_NCName @"co.cocoanuts.gremlin.manifest.note"
 #define GRSBSupport_MessagePortName "co.cocoanuts.gremlin.sbsupport"
 #define gremlind_MessagePortName "co.cocoanuts.gremlin.center"
+
+#define GRManifest_serverResetNotification @"GRManifestServerReset"
+#define GRManifest_tasksUpdatedNotification @"GRManifestTasksUpdated"
 
 typedef enum gr_message {
     /* Legacy API */
@@ -17,3 +20,4 @@ typedef enum gr_message {
     GREMLIN_FAILURE = 2,
     GREMLIN_SUCCESS = 6
 } gr_message_t;
+

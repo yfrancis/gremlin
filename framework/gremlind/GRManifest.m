@@ -4,7 +4,6 @@
 
 #import "GRManifest.h"
 #import "GRIPCProtocol.h"
-#import <AppSupport/CPDistributedMessagingCenter.h>
 
 #define kManifestDir [NSHomeDirectory() stringByAppendingPathComponent: \
                         @"Library/Gremlin"]
@@ -13,8 +12,18 @@
 #define kHistoryFile [kManifestDir stringByAppendingPathComponent: \
                         @"history.plist"]
 
+#define kClientDidStartListeningNotificationName \
+    @"CPDistributedNotificationCenterClientDidStartListeningNotification"
+
+@interface CPDistributedNotificationCenter : NSObject
++ (CPDistributedNotificationCenter*)centerNamed:(NSString*)centerName;
+- (void)runServer;
+- (void)postNotificationName:(NSString*)name;
+- (void)postNotificationName:(NSString*)name userInfo:(NSDictionary*)info;
+@end
+
 static NSMutableDictionary* activity_ = nil;
-static CPDistributedMessagingCenter* center_ = nil;
+static CPDistributedNotificationCenter* center_ = nil;
 
 @implementation GRManifest
 
@@ -28,25 +37,23 @@ static CPDistributedMessagingCenter* center_ = nil;
                                                    attributes:nil
                                                         error:nil];
 
-        NSString* centerName = @GRManifest_MessagePortName;
-        center_ = [CPDistributedMessagingCenter centerNamed:centerName];
-        [center_ runServerOnCurrentThread];
-
-        [center_ registerForMessageName:@"getManifest"
-                                 target:self
-                               selector:@selector(_getManifest:userInfo:)];
+        center_ = [CPDistributedNotificationCenter centerNamed:
+                    GRManifest_NCName];
+        [center_ runServer];        
         [center_ retain];
     });
 }
 
-#pragma mark IPC
+#pragma mark Getters
 
-- (NSDictionary*)getManifest:(NSString*)msg userInfo:(NSDictionary*)info
++ (NSMutableDictionary*)activity
 {
-    NSString* type = [info objectForKey:@"type"];
-    if ([type isEqualToString:@"active"])
-        return activity_;
-    return nil;
+    return [NSMutableDictionary dictionaryWithContentsOfFile:kActivityFile];
+}
+
++ (NSMutableDictionary*)history
+{
+    return [NSMutableDictionary dictionaryWithContentsOfFile:kHistoryFile];
 }
 
 #pragma mark Persistence
@@ -59,8 +66,11 @@ static CPDistributedMessagingCenter* center_ = nil;
 + (void)addTask:(GRTask*)task
 {
     @synchronized(activity_) {
-        [activity_ setObject:[task info] forKey:task.uuid];
+        NSDictionary* info = [task info];
+        [activity_ setObject:info forKey:task.uuid];
         [self synchronize];
+        [center_ postNotificationName:GRManifest_tasksUpdatedNotification
+                             userInfo:activity_];
     }
 }
 
@@ -78,12 +88,13 @@ static CPDistributedMessagingCenter* center_ = nil;
         if (error != nil)
             [info setObject:[error description] forKey:@"error"];
     
-        NSMutableArray* history;
-        history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
-        [history addObject:info];
+        NSMutableDictionary* history = [GRManifest history];
+        [history setObject:info forKey:task.uuid];
         [history writeToFile:kHistoryFile atomically:YES];
         
         [self synchronize];
+        [center_ postNotificationName:GRManifest_tasksUpdatedNotification
+                             userInfo:activity_];
     }
 }
 
@@ -91,20 +102,21 @@ static CPDistributedMessagingCenter* center_ = nil;
 
 + (NSArray*)recoveredTasks
 {
-    NSDictionary* mfst;
-    mfst = [NSDictionary dictionaryWithContentsOfFile:kActivityFile];
+    NSDictionary* mfst = [GRManifest activity];
     [[NSFileManager defaultManager] removeItemAtPath:kActivityFile error:nil];
     
-    NSMutableArray* history;
-    history = [NSMutableArray arrayWithContentsOfFile:kHistoryFile];
-    for (NSDictionary* info in [mfst allValues]) {
-        NSMutableDictionary* outInfo;
-        outInfo = [NSMutableDictionary dictionaryWithDictionary:info];
+    NSMutableDictionary* history = [GRManifest history];
+    for (NSString* key in [mfst allKeys]) {
+        NSMutableDictionary* outInfo = [[mfst objectForKey:key] mutableCopy];
         [outInfo setObject:[NSNumber numberWithBool:NO] forKey:@"status"];
-        [outInfo setObject:@"Gremlin server crashed" forKey:@"error"];
-        [history addObject:outInfo];
+        [outInfo setObject:@"Gremlin server terminated prematurely" 
+                    forKey:@"error"];
+        [history setObject:outInfo forKey:key];
+        [outInfo release];
     }
     [history writeToFile:kHistoryFile atomically:YES];
+
+    [center_ postNotificationName:GRManifest_serverResetNotification];
 
     return [mfst allValues];
 }

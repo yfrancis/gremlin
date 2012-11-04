@@ -20,6 +20,5 @@
 + (NSArray*)availableDestinationsForFile:(NSString*)path;
 + (GRDestination*)defaultDestinationForFile:(NSString*)path;
 
-+ (NSArray*)getActiveTasks;
 + (NSArray*)getHistory;
 @end
