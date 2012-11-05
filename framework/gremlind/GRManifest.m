@@ -20,6 +20,9 @@
 - (void)runServer;
 - (void)postNotificationName:(NSString*)name;
 - (void)postNotificationName:(NSString*)name userInfo:(NSDictionary*)info;
+- (void)postNotificationName:(NSString*)name 
+					userInfo:(NSDictionary*)info 
+		  toBundleIdentifier:(NSString*)identifier;
 @end
 
 static NSMutableDictionary* activity_ = nil;
@@ -41,7 +44,35 @@ static CPDistributedNotificationCenter* center_ = nil;
                     GRManifest_NCName];
         [center_ runServer];        
         [center_ retain];
+
+		NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+		[nc addObserver:self
+			   selector:@selector(clientDidStartListening:)
+				   name:kClientDidStartListeningNotificationName
+				 object:center_];
     });
+}
+
+#pragma mark CPDistributedNotificationCenter
+
++ (void)postTasksUpdatedToClient:(NSString*)client
+{
+	if (client != nil) {
+		[center_ postNotificationName:GRManifest_tasksUpdatedNotification
+							 userInfo:activity_
+				   toBundleIdentifier:client];
+	}
+	else {
+		[center_ postNotificationName:GRManifest_tasksUpdatedNotification
+					 userInfo:activity_];
+	}
+}
+
++ (void)clientDidStartListening:(NSNotification*)note
+{
+	NSDictionary* userInfo = [note userInfo];
+	NSString* bundleIdentifier = [userInfo objectForKey:@"CPBundleIdentifier"];
+	[self postTasksUpdatedToClient:bundleIdentifier];
 }
 
 #pragma mark Getters
@@ -69,8 +100,7 @@ static CPDistributedNotificationCenter* center_ = nil;
         NSDictionary* info = [task info];
         [activity_ setObject:info forKey:task.uuid];
         [self synchronize];
-        [center_ postNotificationName:GRManifest_tasksUpdatedNotification
-                             userInfo:activity_];
+		[self postTasksUpdatedToClient:nil];
     }
 }
 
@@ -93,8 +123,7 @@ static CPDistributedNotificationCenter* center_ = nil;
         [history writeToFile:kHistoryFile atomically:YES];
         
         [self synchronize];
-        [center_ postNotificationName:GRManifest_tasksUpdatedNotification
-                             userInfo:activity_];
+		[self postTasksUpdatedToClient:nil];
     }
 }
 
@@ -116,8 +145,7 @@ static CPDistributedNotificationCenter* center_ = nil;
     }
     [history writeToFile:kHistoryFile atomically:YES];
 
-    [center_ postNotificationName:GRManifest_serverResetNotification];
-
+	[self postTasksUpdatedToClient:nil];
     return [mfst allValues];
 }
 

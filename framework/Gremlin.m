@@ -5,6 +5,7 @@
 #import "Gremlin.h"
 #import "GRClient.h"
 #import "GRPluginScanner.h"
+#import "GRTask.h"
 
 #define kGremlinAPIVersion 2
 
@@ -191,7 +192,14 @@ static NSMutableDictionary* localImports_ = nil;
 
 + (NSArray*)getHistory
 {
-    return [NSDictionary dictionaryWithContentsOfFile:kHistoryFile];
+    NSDictionary* history;
+	history = [NSDictionary dictionaryWithContentsOfFile:kHistoryFile];
+
+	NSMutableArray* tasks = [NSMutableArray array];
+	for (NSDictionary* taskInfo in [history allValues]) {
+		[tasks addObject:[GRTask taskWithInfo:taskInfo]];
+	}
+	return tasks;
 }
 
 @end

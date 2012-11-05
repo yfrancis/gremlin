@@ -16,7 +16,7 @@ Gremlin_FRAMEWORKS = MobileCoreServices
 Gremlin_PRIVATE_FRAMEWORKS = AppSupport
 Gremlin_INSTALL_PATH = /Library/Frameworks
 
-SUBPROJECTS = gremlind gimport nc prefs
+SUBPROJECTS = gremlind gimport prefs
 
 include $(THEOS_MAKE_PATH)/framework.mk
 include $(THEOS_MAKE_PATH)/aggregate.mk
