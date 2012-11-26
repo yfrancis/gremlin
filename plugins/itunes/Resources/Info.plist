@@ -64,6 +64,7 @@
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>mp4</string>
+				<string>m4v</string>
 				<string>mov</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
@@ -77,6 +78,7 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.mpeg-4</string>
+				<string>com.apple.m4v-video</string>
 			</array>
 		</dict>
 	</array>
