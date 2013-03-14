@@ -1,13 +1,11 @@
 Package: co.cocoanuts.gremlin
 Name: Gremlin Framework
 Pre-Depends: firmware (>= 4.2)
-Conflicts: gremlin, co.cocoanuts.gremlin2
+Conflicts: gremlin, co.cocoanuts.gremlin2, com.harrisonapps.universalvideodownloader (<= 1.1)
 Provides: co.cocoanuts.gremlin2
 Replaces: co.cocoanuts.gremlin2
-Depends: co.cocoanuts.gremlinplugins, preferenceloader,
-    firmware (<< 5.0) | com.chpwn.weeloader, 
-    com.yfrancis.bugsense
-Version: 3.0
+Depends: co.cocoanuts.gremlinplugins
+Version: 3.0.2
 Architecture: iphoneos-arm
 Description: Media import framework for iOS.
     Gremlin allows you to import your Photos,
@@ -20,4 +18,4 @@ Maintainer: CocoaNuts <support+gremlin@cocoanuts.co>
 Author: Youssef Francis
 Section: Multimedia
 Priority: optional
-Tag: role::developer
+Tag: purpose::library

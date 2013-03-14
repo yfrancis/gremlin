@@ -5,13 +5,11 @@ include $(THEOS)/makefiles/common.mk
 TOOL_NAME = gremlind
 gremlind_FILES = main.m $(wildcard GR*.m)
 gremlind_INSTALL_PATH = /Library/Frameworks/Gremlin.framework/Support.bundle
-gremlind_FRAMEWORKS = MobileCoreServices
-gremlind_PRIVATE_FRAMEWORKS = AppSupport
-gremlind_CFLAGS += -ggdb -I../ipc -I../include
-
-# Gremlin.framework
+gremlind_CFLAGS += -ggdb -I../ipc -I../include -F../.products
 gremlind_CFLAGS += -F../.products
 gremlind_LDFLAGS += -F../.products -framework Gremlin
+gremlind_FRAMEWORKS = MobileCoreServices Gremlin
+gremlind_PRIVATE_FRAMEWORKS = AppSupport
 
 include $(THEOS_MAKE_PATH)/tool.mk
 

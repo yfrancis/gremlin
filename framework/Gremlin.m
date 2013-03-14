@@ -140,10 +140,18 @@ static NSMutableDictionary* localImports_ = nil;
 {
     NSMutableDictionary* dict = [NSMutableDictionary dictionary];
     
-    // give each individual task a uuid
-    [self updateTaskInfoForImports:files];
+    NSMutableArray* importArray = [NSMutableArray array];
 
-    [dict setObject:files forKey:@"import"];
+    for (NSDictionary* info  in files) {
+        if (![info isKindOfClass:[NSDictionary class]])
+            return NO;
+        [importArray addObject:[[info mutableCopy] autorelease]];
+    }
+
+    // give each individual task a uuid
+    [self updateTaskInfoForImports:importArray];
+
+    [dict setObject:importArray forKey:@"import"];
     [dict setObject:[NSNumber numberWithInt:kGremlinAPIVersion] 
              forKey:@"apiVersion"];
 

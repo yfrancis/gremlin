@@ -17,9 +17,7 @@ Gremlin_PRIVATE_FRAMEWORKS = AppSupport
 Gremlin_INSTALL_PATH = /Library/Frameworks
 
 SUBPROJECTS = gremlind gimport prefs
-
-include $(THEOS_MAKE_PATH)/framework.mk
-include $(THEOS_MAKE_PATH)/aggregate.mk
+include $(THEOS)/makefiles/aggregate.mk
 
 # Set the paths for the framework stub
 PRODUCT_PATH_ = .products
@@ -34,6 +32,3 @@ after-Gremlin-all::
 	$(ECHO_NOTHING)ln -Fs $(PROJECT_PATH_)/Resources/* $(FMWK_PATH_)/$(ECHO_END)
 	$(ECHO_NOTHING)cp $(THEOS_OBJ_DIR)/Gremlin $(BINARY_DEST_)$(ECHO_END)
 	$(ECHO_NOTHING)$(TARGET_STRIP) -cx $(BINARY_DEST_)$(ECHO_END)
-
-internal-clean::
-	$(ECHO_NOTHING)rm -rf $(PRODUCT_PATH_)$(ECHO_END)

@@ -16,4 +16,5 @@
 @property (retain) NSString* name;
 
 + (GRDestination*)destinationForBundle:(NSBundle*)bundle rank:(NSString*)rank;
+
 @end
