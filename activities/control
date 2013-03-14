@@ -1,0 +1,11 @@
+Package: co.cocoanuts.gremlin.activities
+Name: Gremlin Activities for iOS6
+Pre-Depends: firmware (>= 6.0)
+Depends: co.cocoanuts.gremlin
+Version: 1.0
+Architecture: iphoneos-arm
+Description: Gremlin import activities for iOS6
+Maintainer: CocoaNuts <support+gractivities@cocoanuts.co>
+Author: CocoaNuts <support+gractivities@cocoanuts.co>
+Section: System
+Tag: role::developer
