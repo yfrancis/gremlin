@@ -1,0 +1,9 @@
+Package: co.cocoanuts.gremlinnotify
+Name: GremlinNotify
+Depends: mobilesubstrate
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: Nicolas Haunold
+Author: Nicolas Haunold
+Section: Tweaks

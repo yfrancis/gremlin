@@ -5,8 +5,8 @@
 #import "GRManifest.h"
 #import "GRIPCProtocol.h"
 
-#define kManifestDir [NSHomeDirectory() stringByAppendingPathComponent: \
-                        @"Library/Gremlin"]
+#define kManifestDir [@"/private/var/mobile/Library" stringByAppendingPathComponent: \
+                        @"Gremlin"]
 #define kActivityFile [kManifestDir stringByAppendingPathComponent: \
                         @"activity.plist"]
 #define kHistoryFile [kManifestDir stringByAppendingPathComponent: \
@@ -71,6 +71,7 @@ static CPDistributedNotificationCenter* center_ = nil;
 + (void)clientDidStartListening:(NSNotification*)note
 {
 	NSDictionary* userInfo = [note userInfo];
+
 	NSString* bundleIdentifier = [userInfo objectForKey:@"CPBundleIdentifier"];
 	[self postTasksUpdatedToClient:bundleIdentifier];
 }
@@ -88,9 +89,20 @@ static CPDistributedNotificationCenter* center_ = nil;
 }
 
 #pragma mark Persistence
-
++ (void)checkManifestDirectory
+{
+    NSFileManager* manager = [NSFileManager defaultManager];
+    if (![manager fileExistsAtPath:kManifestDir]) {
+        NSLog(@"NoDirectoryBro");
+        NSError *err;
+        [manager createDirectoryAtPath:kManifestDir withIntermediateDirectories:YES
+                            attributes:nil error:&err];
+        NSLog(@"Err: %@", err);
+    }
+}
 + (void)synchronize
 {
+    //[self checkManifestDirectory];
     [activity_ writeToFile:kActivityFile atomically:YES];
 }
 
@@ -118,7 +130,10 @@ static CPDistributedNotificationCenter* center_ = nil;
         if (error != nil)
             [info setObject:[error description] forKey:@"error"];
     
+        //[self checkManifestDirectory];
+
         NSMutableDictionary* history = [GRManifest history];
+        if (history == nil) history = [NSMutableDictionary new];
         [history setObject:info forKey:task.uuid];
         [history writeToFile:kHistoryFile atomically:YES];
         

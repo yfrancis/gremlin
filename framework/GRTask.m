@@ -8,7 +8,9 @@
     apiVersion,
     mediaKind,
     destination,
-    metadata;
+    metadata,
+    error,
+    status;
 
 + (NSString*)getUUID
 {
@@ -38,7 +40,11 @@
 
     if (metadata != nil)
         [temp setObject:metadata forKey:@"metadata"];
-   
+    if (error != nil)
+        [temp setObject:error forKey:@"error"];
+    if (status != nil)
+        [temp setObject:status forKey:@"status"];
+
     return [[temp copy] autorelease];
 }
 
@@ -50,7 +56,9 @@
                     apiVersion:[[info objectForKey:@"apiVersion"] integerValue]
                      mediaKind:[info objectForKey:@"mediaKind"]
                    destination:[info objectForKey:@"destination"]
-                      metadata:[info objectForKey:@"metadata"]];
+                      metadata:[info objectForKey:@"metadata"]
+                         error:[info objectForKey:@"error"]
+                        status:[info objectForKey:@"status"]];
 }
 
 + (GRTask*)taskForUUID:(NSString*)uuid
@@ -60,6 +68,8 @@
              mediaKind:(NSString*)mediaKind
            destination:(NSString*)destination
               metadata:(NSDictionary*)metadata
+                 error:(NSString *)error
+                status:(NSNumber *)status
 {
     GRTask* task = [GRTask new];
     
@@ -70,7 +80,8 @@
     task.mediaKind = mediaKind;
     task.destination = destination;
     task.metadata = metadata;
-
+    task.error = error;
+    task.status = status;
     return [task autorelease];
 }
 
@@ -82,6 +93,8 @@
     self.mediaKind = nil;
     self.destination = nil;
     self.metadata = nil;
+    self.error = nil;
+    self.status = nil;
     [super dealloc];
 }
 @end

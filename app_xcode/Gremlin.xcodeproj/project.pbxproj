@@ -1,0 +1,430 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3C185F2B165197F900B956CC /* GAHistoryViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C185F2A165197F900B956CC /* GAHistoryViewController.xib */; };
+		3C185F2F1651994400B956CC /* GAHistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C185F2E1651994400B956CC /* GAHistoryViewController.m */; };
+		3C185F311651A85900B956CC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C185F301651A85900B956CC /* AudioToolbox.framework */; };
+		3C185F3816522EB000B956CC /* history.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C185F3616522EB000B956CC /* history.png */; };
+		3C185F3916522EB000B956CC /* history@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C185F3716522EB000B956CC /* history@2x.png */; };
+		3C35AC541644527A00419346 /* AppSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C35AC531644527A00419346 /* AppSupport.framework */; };
+		3C4C633C16435229003373FD /* GAActivityTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C4C633B16435229003373FD /* GAActivityTableViewCell.xib */; };
+		3C4C63401643552D003373FD /* GAActivityTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C4C633F1643552D003373FD /* GAActivityTableViewCell.m */; };
+		3C66BB1B1652EFFB00716CE2 /* Gremlin.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C66BB1A1652EFFB00716CE2 /* Gremlin.framework */; };
+		3C82172A164DF2B8003893F9 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C821729164DF2B8003893F9 /* AVFoundation.framework */; };
+		3C821733164DF950003893F9 /* podcast@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C821732164DF950003893F9 /* podcast@2x.png */; };
+		3C821739164E03F9003893F9 /* itunes@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C821738164E03F9003893F9 /* itunes@2x.png */; };
+		3C82173B164E0464003893F9 /* image@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C82173A164E0464003893F9 /* image@2x.png */; };
+		3C82173D164E0498003893F9 /* vidya@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3C82173C164E0498003893F9 /* vidya@2x.png */; };
+		3CE0C4A01663346C00BB4952 /* x@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CE0C49F1663346C00BB4952 /* x@2x.png */; };
+		3CE0C4A31663350500BB4952 /* x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CE0C4A21663350500BB4952 /* x.png */; };
+		3CF9580616430F3E00214273 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CF9580516430F3E00214273 /* UIKit.framework */; };
+		3CF9580816430F3E00214273 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CF9580716430F3E00214273 /* Foundation.framework */; };
+		3CF9580A16430F3E00214273 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CF9580916430F3E00214273 /* CoreGraphics.framework */; };
+		3CF9581016430F3F00214273 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3CF9580E16430F3F00214273 /* InfoPlist.strings */; };
+		3CF9581216430F3F00214273 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CF9581116430F3F00214273 /* main.m */; };
+		3CF9581616430F3F00214273 /* GAAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CF9581516430F3F00214273 /* GAAppDelegate.m */; };
+		3CF9581816430F3F00214273 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CF9581716430F3F00214273 /* Default.png */; };
+		3CF9581A16430F3F00214273 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CF9581916430F3F00214273 /* Default@2x.png */; };
+		3CF9581C16430F3F00214273 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CF9581B16430F3F00214273 /* Default-568h@2x.png */; };
+		3CF9583016430F3F00214273 /* GAPluginsListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3CF9582E16430F3F00214273 /* GAPluginsListViewController.xib */; };
+		3CF958391643100600214273 /* Activity.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CF958371643100600214273 /* Activity.png */; };
+		3CF9583A1643100600214273 /* Activity@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CF958381643100600214273 /* Activity@2x.png */; };
+		3CF9583D1643100F00214273 /* Plugins.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CF9583B1643100F00214273 /* Plugins.png */; };
+		3CF9583E1643100F00214273 /* Plugins@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CF9583C1643100F00214273 /* Plugins@2x.png */; };
+		3CF95842164310EC00214273 /* GAActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CF95840164310EC00214273 /* GAActivityViewController.m */; };
+		3CF95843164310EC00214273 /* GAActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3CF95841164310EC00214273 /* GAActivityViewController.xib */; };
+		3CF958461643130200214273 /* GAPluginsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CF958451643130100214273 /* GAPluginsListViewController.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3C185F2A165197F900B956CC /* GAHistoryViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GAHistoryViewController.xib; sourceTree = "<group>"; };
+		3C185F2D1651994400B956CC /* GAHistoryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAHistoryViewController.h; sourceTree = "<group>"; };
+		3C185F2E1651994400B956CC /* GAHistoryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GAHistoryViewController.m; sourceTree = "<group>"; };
+		3C185F301651A85900B956CC /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		3C185F3616522EB000B956CC /* history.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = history.png; sourceTree = "<group>"; };
+		3C185F3716522EB000B956CC /* history@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "history@2x.png"; sourceTree = "<group>"; };
+		3C35AC531644527A00419346 /* AppSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppSupport.framework; sourceTree = "<group>"; };
+		3C4C633B16435229003373FD /* GAActivityTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GAActivityTableViewCell.xib; sourceTree = "<group>"; };
+		3C4C633E1643552D003373FD /* GAActivityTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAActivityTableViewCell.h; sourceTree = "<group>"; };
+		3C4C633F1643552D003373FD /* GAActivityTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GAActivityTableViewCell.m; sourceTree = "<group>"; };
+		3C66BB1A1652EFFB00716CE2 /* Gremlin.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Gremlin.framework; sourceTree = "<group>"; };
+		3C821729164DF2B8003893F9 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		3C821732164DF950003893F9 /* podcast@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "podcast@2x.png"; sourceTree = "<group>"; };
+		3C821738164E03F9003893F9 /* itunes@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "itunes@2x.png"; sourceTree = "<group>"; };
+		3C82173A164E0464003893F9 /* image@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "image@2x.png"; sourceTree = "<group>"; };
+		3C82173C164E0498003893F9 /* vidya@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "vidya@2x.png"; sourceTree = "<group>"; };
+		3CE0C49F1663346C00BB4952 /* x@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "x@2x.png"; sourceTree = "<group>"; };
+		3CE0C4A21663350500BB4952 /* x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = x.png; sourceTree = "<group>"; };
+		3CF9580116430F3E00214273 /* Gremlin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gremlin.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CF9580516430F3E00214273 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		3CF9580716430F3E00214273 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		3CF9580916430F3E00214273 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		3CF9580D16430F3F00214273 /* Gremlin-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Gremlin-Info.plist"; sourceTree = "<group>"; };
+		3CF9580F16430F3F00214273 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		3CF9581116430F3F00214273 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		3CF9581316430F3F00214273 /* Gremlin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Gremlin-Prefix.pch"; sourceTree = "<group>"; };
+		3CF9581416430F3F00214273 /* GAAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GAAppDelegate.h; sourceTree = "<group>"; };
+		3CF9581516430F3F00214273 /* GAAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GAAppDelegate.m; sourceTree = "<group>"; };
+		3CF9581716430F3F00214273 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		3CF9581916430F3F00214273 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		3CF9581B16430F3F00214273 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		3CF9582F16430F3F00214273 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/GAPluginsListViewController.xib; sourceTree = "<group>"; };
+		3CF958371643100600214273 /* Activity.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Activity.png; sourceTree = "<group>"; };
+		3CF958381643100600214273 /* Activity@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Activity@2x.png"; sourceTree = "<group>"; };
+		3CF9583B1643100F00214273 /* Plugins.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Plugins.png; sourceTree = "<group>"; };
+		3CF9583C1643100F00214273 /* Plugins@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Plugins@2x.png"; sourceTree = "<group>"; };
+		3CF9583F164310EC00214273 /* GAActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAActivityViewController.h; sourceTree = "<group>"; };
+		3CF95840164310EC00214273 /* GAActivityViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GAActivityViewController.m; sourceTree = "<group>"; };
+		3CF95841164310EC00214273 /* GAActivityViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GAActivityViewController.xib; sourceTree = "<group>"; };
+		3CF958441643130100214273 /* GAPluginsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAPluginsListViewController.h; sourceTree = "<group>"; };
+		3CF958451643130100214273 /* GAPluginsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GAPluginsListViewController.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3CF957FE16430F3E00214273 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C185F311651A85900B956CC /* AudioToolbox.framework in Frameworks */,
+				3C82172A164DF2B8003893F9 /* AVFoundation.framework in Frameworks */,
+				3CF9580616430F3E00214273 /* UIKit.framework in Frameworks */,
+				3CF9580816430F3E00214273 /* Foundation.framework in Frameworks */,
+				3CF9580A16430F3E00214273 /* CoreGraphics.framework in Frameworks */,
+				3C35AC541644527A00419346 /* AppSupport.framework in Frameworks */,
+				3C66BB1B1652EFFB00716CE2 /* Gremlin.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3C35AC56164452DD00419346 /* interfaces */ = {
+			isa = PBXGroup;
+			children = (
+				3CF95841164310EC00214273 /* GAActivityViewController.xib */,
+				3C185F2A165197F900B956CC /* GAHistoryViewController.xib */,
+				3CF9582E16430F3F00214273 /* GAPluginsListViewController.xib */,
+				3C4C633B16435229003373FD /* GAActivityTableViewCell.xib */,
+			);
+			name = interfaces;
+			sourceTree = "<group>";
+		};
+		3CF957F616430F3E00214273 = {
+			isa = PBXGroup;
+			children = (
+				3CF9580B16430F3E00214273 /* Gremlin */,
+				3CF9580416430F3E00214273 /* Frameworks */,
+				3CF9580216430F3E00214273 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3CF9580216430F3E00214273 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3CF9580116430F3E00214273 /* Gremlin.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3CF9580416430F3E00214273 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3C66BB1A1652EFFB00716CE2 /* Gremlin.framework */,
+				3C185F301651A85900B956CC /* AudioToolbox.framework */,
+				3C821729164DF2B8003893F9 /* AVFoundation.framework */,
+				3C35AC531644527A00419346 /* AppSupport.framework */,
+				3CF9580516430F3E00214273 /* UIKit.framework */,
+				3CF9580716430F3E00214273 /* Foundation.framework */,
+				3CF9580916430F3E00214273 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3CF9580B16430F3E00214273 /* Gremlin */ = {
+			isa = PBXGroup;
+			children = (
+				3C35AC56164452DD00419346 /* interfaces */,
+				3CF9583616430FE500214273 /* images */,
+				3CF9581416430F3F00214273 /* GAAppDelegate.h */,
+				3CF9581516430F3F00214273 /* GAAppDelegate.m */,
+				3CF9583F164310EC00214273 /* GAActivityViewController.h */,
+				3CF95840164310EC00214273 /* GAActivityViewController.m */,
+				3C185F2D1651994400B956CC /* GAHistoryViewController.h */,
+				3C185F2E1651994400B956CC /* GAHistoryViewController.m */,
+				3CF958441643130100214273 /* GAPluginsListViewController.h */,
+				3CF958451643130100214273 /* GAPluginsListViewController.m */,
+				3C4C633E1643552D003373FD /* GAActivityTableViewCell.h */,
+				3C4C633F1643552D003373FD /* GAActivityTableViewCell.m */,
+				3CF9580C16430F3F00214273 /* Supporting Files */,
+			);
+			path = Gremlin;
+			sourceTree = "<group>";
+		};
+		3CF9580C16430F3F00214273 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				3CF9580D16430F3F00214273 /* Gremlin-Info.plist */,
+				3CF9580E16430F3F00214273 /* InfoPlist.strings */,
+				3CF9581116430F3F00214273 /* main.m */,
+				3CF9581316430F3F00214273 /* Gremlin-Prefix.pch */,
+				3CF9581716430F3F00214273 /* Default.png */,
+				3CF9581916430F3F00214273 /* Default@2x.png */,
+				3CF9581B16430F3F00214273 /* Default-568h@2x.png */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		3CF9583616430FE500214273 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				3CE0C4A21663350500BB4952 /* x.png */,
+				3CE0C49F1663346C00BB4952 /* x@2x.png */,
+				3C185F3616522EB000B956CC /* history.png */,
+				3C185F3716522EB000B956CC /* history@2x.png */,
+				3C82173C164E0498003893F9 /* vidya@2x.png */,
+				3C82173A164E0464003893F9 /* image@2x.png */,
+				3C821738164E03F9003893F9 /* itunes@2x.png */,
+				3C821732164DF950003893F9 /* podcast@2x.png */,
+				3CF958371643100600214273 /* Activity.png */,
+				3CF958381643100600214273 /* Activity@2x.png */,
+				3CF9583B1643100F00214273 /* Plugins.png */,
+				3CF9583C1643100F00214273 /* Plugins@2x.png */,
+			);
+			name = images;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3CF9580016430F3E00214273 /* Gremlin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3CF9583316430F3F00214273 /* Build configuration list for PBXNativeTarget "Gremlin" */;
+			buildPhases = (
+				3CF957FD16430F3E00214273 /* Sources */,
+				3CF957FE16430F3E00214273 /* Frameworks */,
+				3CF957FF16430F3E00214273 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Gremlin;
+			productName = Gremlin;
+			productReference = 3CF9580116430F3E00214273 /* Gremlin.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3CF957F816430F3E00214273 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = GA;
+				LastUpgradeCheck = 0450;
+				ORGANIZATIONNAME = CocoaNuts;
+			};
+			buildConfigurationList = 3CF957FB16430F3E00214273 /* Build configuration list for PBXProject "Gremlin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 3CF957F616430F3E00214273;
+			productRefGroup = 3CF9580216430F3E00214273 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3CF9580016430F3E00214273 /* Gremlin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3CF957FF16430F3E00214273 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CF9581016430F3F00214273 /* InfoPlist.strings in Resources */,
+				3CF9581816430F3F00214273 /* Default.png in Resources */,
+				3CF9581A16430F3F00214273 /* Default@2x.png in Resources */,
+				3CF9581C16430F3F00214273 /* Default-568h@2x.png in Resources */,
+				3CF9583016430F3F00214273 /* GAPluginsListViewController.xib in Resources */,
+				3CF958391643100600214273 /* Activity.png in Resources */,
+				3CF9583A1643100600214273 /* Activity@2x.png in Resources */,
+				3CF9583D1643100F00214273 /* Plugins.png in Resources */,
+				3CF9583E1643100F00214273 /* Plugins@2x.png in Resources */,
+				3CF95843164310EC00214273 /* GAActivityViewController.xib in Resources */,
+				3C4C633C16435229003373FD /* GAActivityTableViewCell.xib in Resources */,
+				3C821733164DF950003893F9 /* podcast@2x.png in Resources */,
+				3C821739164E03F9003893F9 /* itunes@2x.png in Resources */,
+				3C82173B164E0464003893F9 /* image@2x.png in Resources */,
+				3C82173D164E0498003893F9 /* vidya@2x.png in Resources */,
+				3C185F2B165197F900B956CC /* GAHistoryViewController.xib in Resources */,
+				3C185F3816522EB000B956CC /* history.png in Resources */,
+				3C185F3916522EB000B956CC /* history@2x.png in Resources */,
+				3CE0C4A01663346C00BB4952 /* x@2x.png in Resources */,
+				3CE0C4A31663350500BB4952 /* x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3CF957FD16430F3E00214273 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CF9581216430F3F00214273 /* main.m in Sources */,
+				3CF9581616430F3F00214273 /* GAAppDelegate.m in Sources */,
+				3CF95842164310EC00214273 /* GAActivityViewController.m in Sources */,
+				3CF958461643130200214273 /* GAPluginsListViewController.m in Sources */,
+				3C4C63401643552D003373FD /* GAActivityTableViewCell.m in Sources */,
+				3C185F2F1651994400B956CC /* GAHistoryViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		3CF9580E16430F3F00214273 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3CF9580F16430F3F00214273 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		3CF9582E16430F3F00214273 /* GAPluginsListViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3CF9582F16430F3F00214273 /* en */,
+			);
+			name = GAPluginsListViewController.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3CF9583116430F3F00214273 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		3CF9583216430F3F00214273 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3CF9583416430F3F00214273 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Gremlin\"",
+					"\"$(SRCROOT)\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Gremlin/Gremlin-Prefix.pch";
+				INFOPLIST_FILE = "Gremlin/Gremlin-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos6.0;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		3CF9583516430F3F00214273 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Gremlin\"",
+					"\"$(SRCROOT)\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Gremlin/Gremlin-Prefix.pch";
+				INFOPLIST_FILE = "Gremlin/Gremlin-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				SDKROOT = iphoneos6.0;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3CF957FB16430F3E00214273 /* Build configuration list for PBXProject "Gremlin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CF9583116430F3F00214273 /* Debug */,
+				3CF9583216430F3F00214273 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3CF9583316430F3F00214273 /* Build configuration list for PBXNativeTarget "Gremlin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CF9583416430F3F00214273 /* Debug */,
+				3CF9583516430F3F00214273 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3CF957F816430F3E00214273 /* Project object */;
+}

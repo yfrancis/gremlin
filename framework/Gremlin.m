@@ -9,8 +9,8 @@
 
 #define kGremlinAPIVersion 2
 
-#define kManifestDir [NSHomeDirectory() stringByAppendingPathComponent: \
-                        @"Library/Gremlin"]
+#define kManifestDir [@"/private/var/mobile/Library" stringByAppendingPathComponent: \
+                        @"Gremlin"]
 #define kHistoryFile [kManifestDir stringByAppendingPathComponent: \
                         @"history.plist"]
 
@@ -202,7 +202,6 @@ static NSMutableDictionary* localImports_ = nil;
 {
     NSDictionary* history;
 	history = [NSDictionary dictionaryWithContentsOfFile:kHistoryFile];
-
 	NSMutableArray* tasks = [NSMutableArray array];
 	for (NSDictionary* taskInfo in [history allValues]) {
 		[tasks addObject:[GRTask taskWithInfo:taskInfo]];

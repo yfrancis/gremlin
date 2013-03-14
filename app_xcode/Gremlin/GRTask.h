@@ -11,8 +11,7 @@
 @property (retain) NSString* mediaKind;
 @property (retain) NSString* destination;
 @property (retain) NSDictionary* metadata;
-@property (retain) NSString *error;
-@property (retain) NSNumber *status;
+
 - (NSDictionary*)info;
 + (GRTask*)taskWithInfo:(NSDictionary*)info;
 + (GRTask*)taskForUUID:(NSString*)uuid
@@ -21,8 +20,6 @@
             apiVersion:(NSInteger)apiVersion
              mediaKind:(NSString*)mediaKind
            destination:(NSString*)destination
-              metadata:(NSDictionary*)metadata
-                 error:(NSString *)error
-                status:(NSNumber *)status;
+              metadata:(NSDictionary*)metadata;
 
 @end

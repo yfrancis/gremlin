@@ -152,6 +152,7 @@
     }
     else {
         chosenDestination = [plugins objectAtIndex:0];
+        task.destination = chosenDestination.name;
     }
 
     if (chosenDestination == nil) {

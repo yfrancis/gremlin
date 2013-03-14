@@ -217,7 +217,9 @@ sendImportCompletionStatusWithInfo(CFDictionaryRef info,
                             apiVersion:apiVersion
                              mediaKind:nil
                            destination:nil
-                              metadata:nil];
+                              metadata:nil
+                                 error:nil
+                                status:nil];
         }
        
         if (task != nil)
