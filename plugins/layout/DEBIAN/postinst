@@ -1,0 +1,5 @@
+#!/bin/bash
+
+/bin/launchctl unload /System/Library/LaunchDaemons/com.apple.itunesstored.plist
+/bin/launchctl load /System/Library/LaunchDaemons/com.apple.itunesstored.plist
+/bin/launchctl start com.apple.itunesstored

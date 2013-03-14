@@ -2,6 +2,8 @@
  *  Created by Youssef Francis on September 25th, 2012.
  */
 
+#include <unistd.h>
+
 #import "GRImporterProtocol.h"
 #import "GRiTunesImportHelper.h"
 #import "GRiTunesMP4Utilities.h"
@@ -19,7 +21,7 @@
     NSString* mkdstr = @"gremlin.XXXXXX";
     tmplStr = [NSTemporaryDirectory() stringByAppendingPathComponent:mkdstr];
 
-    const char *tmplCstr = [tmplStr fileSystemRepresentation];
+    const char* tmplCstr = [tmplStr fileSystemRepresentation];
     char* tmpNameCstr = (char*)malloc(strlen(tmplCstr) + 1);
     strcpy(tmpNameCstr, tmplCstr);
     char* result = mkdtemp(tmpNameCstr);
@@ -62,8 +64,60 @@
                 [dict setObject:imageData forKey:@"imageData"];
         }
         else if ([value isKindOfClass:[NSString class]])
-            [dict setObject:value
-                     forKey:mdi.commonKey];
+            [dict setObject:value forKey:mdi.commonKey];
+    }
+
+    // other metadata without a common representation
+    NSArray* availableFormats = [asset availableMetadataFormats];
+    for (NSString* fmt in availableFormats) {
+        NSArray* md = [asset metadataForFormat:fmt];
+
+        for (AVMetadataItem* item in md) {
+            if (item.commonKey != nil) {
+                id value = item.value;
+                
+                // artwork has special handling
+                if ([item.commonKey isEqualToString:AVMetadataCommonKeyArtwork]) {
+                    NSData* imageData = nil;
+                    if ([item.keySpace isEqualToString:AVMetadataKeySpaceID3])
+                        imageData = [value objectForKey:@"data"];
+                    else if ([item.keySpace isEqualToString:AVMetadataKeySpaceiTunes])
+                        imageData = value;
+                    
+                    if (imageData != nil)
+                        [dict setObject:imageData forKey:@"imageData"];
+                }
+                else if ([value isKindOfClass:[NSString class]] ||
+                         [value isKindOfClass:[NSNumber class]]) {
+                    [dict setObject:value forKey:item.commonKey];
+                }
+            }
+            else {
+                NSString* keyName = (NSString*)item.key;
+                if ([item.key isKindOfClass:[NSNumber class]]) {
+                    NSUInteger keyNumber = ntohl([(NSNumber*)item.key unsignedIntegerValue]);
+                    keyName = [NSString stringWithFormat:@"%.4s", (char*)&keyNumber];
+                }
+
+                if ([item.keySpace isEqualToString:AVMetadataKeySpaceID3] &&
+                    [keyName isEqualToString:AVMetadataID3MetadataKeyTrackNumber]) {
+                    [dict setObject:[item numberValue] forKey:@"trackNumber"];
+                }
+                else if ([item.keySpace isEqualToString:AVMetadataKeySpaceiTunes] &&
+                        [keyName isEqualToString:AVMetadataiTunesMetadataKeyTrackNumber]) {
+                    int16_t trackData[4];
+                    [item.dataValue getBytes:trackData length:sizeof(trackData)];
+                    
+                    int16_t trackNumber = ntohs(trackData[1]);
+                    if (trackNumber) 
+                        [dict setObject:[NSNumber numberWithInt:trackNumber] forKey:@"trackNumber"];
+
+                    int16_t trackCount = ntohs(trackData[2]);
+                    if (trackCount)
+                        [dict setObject:[NSNumber numberWithInt:trackCount] forKey:@"trackCount"];
+                }
+            }
+        }
     }
 
     // we also need the duration in ms
@@ -75,10 +129,19 @@
 
     // most basic requirement for metadata is a title
     if ([[dict objectForKey:@"title"] length] == 0) {
-        NSString* path = [asset.URL absoluteString];
+        NSString* path = [asset.URL path];
         NSString* title = [[path lastPathComponent]
                             stringByDeletingPathExtension]; 
         [dict setObject:title forKey:@"title"];
+
+    }
+
+    if ([[dict objectForKey:@"artist"] length] == 0) {
+        [dict setObject:@"Unknown Artist" forKey:@"artist"];
+    }
+
+    if ([[dict objectForKey:@"albumName"] length] == 0) {
+        [dict setObject:@"Unknown Album" forKey:@"albumName"];
     }
 
     return dict;
@@ -157,7 +220,8 @@
         BOOL status = NO;
 
         if ([mediaKind isEqualToString:@"song"] ||
-            [mediaKind isEqualToString:@"ringtone"]) {
+            [mediaKind isEqualToString:@"ringtone"] ||
+			[mediaKind isEqualToString:@"tone"]) {
             // determine output path for conversion (or plain copy)
             NSString* fname;
             fname = [[ipath lastPathComponent] stringByDeletingPathExtension];
@@ -177,9 +241,19 @@
                 timeRange = kCMTimeRangeZero;
             }
 
+			if (!CMTimeRangeEqual(timeRange, kCMTimeRangeZero)) {
+				CMTime duration = timeRange.duration;
+				double duration_s = (double)duration.value/(double)duration.timescale;
+
+				NSMutableDictionary* tempMd = [metadata mutableCopy];
+				[tempMd setObject:[NSNumber numberWithDouble:duration_s] forKey:@"duration"];
+				metadata = [[tempMd copy] autorelease];
+			}
+
             // perform the conversion
             status = [GRiTunesMP4Utilities convertAsset:asset
                                                    dest:opath
+                                               metadata:metadata
                                               timeRange:timeRange
                                                   error:error];
         }

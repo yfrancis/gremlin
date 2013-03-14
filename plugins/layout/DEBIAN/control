@@ -2,7 +2,7 @@ Package: co.cocoanuts.gremlinplugins
 Name: Gremlin Plugin Pack
 Pre-Depends: firmware (>= 4.2)
 Depends: co.cocoanuts.gremlin (>= 3.0)
-Version: 1.0
+Version: 1.5
 Architecture: iphoneos-arm
 Description: iPod import &more
    This plugin pack contains import plugins for

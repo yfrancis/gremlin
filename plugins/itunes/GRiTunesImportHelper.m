@@ -1,7 +1,6 @@
 /*
  *  Created by Youssef Francis on October 3rd, 2012.
  */
-
 #import "GRiTunesImportHelper.h"
 #import "GRStoreServices.h"
 
@@ -22,26 +21,12 @@
     return downloadQueue;
 }
 
-+ (BOOL)importAudioFileAtPath:(NSString*)path
-                    mediaKind:(NSString*)mediaKind
-                 withMetadata:(NSDictionary*)info
-{
-    // if the provided metadata does not at least contain a track
-    // then we should bail out quickly, as this is not a supported
-    // scenario (StoreServices will not choke, it'll instead just
-    // fail silently, which is far worse)
-    if ([[info objectForKey:@"title"] length] == 0)
-        return NO;
-    
-    // we need to move the files into a sandbox-reachable dir
-    NSString* filename = [path lastPathComponent];
-    NSString* npath = [kDownloadsDir stringByAppendingPathComponent:filename];
-    [[NSFileManager defaultManager] moveItemAtPath:path 
-                                            toPath:npath
-                                             error:nil];
++ (SSDownloadMetadata*)_downloadMetadataForItemAtPath:(NSString*)path
+                                            mediaKind:(NSString*)mediaKind
+                                         withMetadata:(NSDictionary*)info
 
-    SSDownloadMetadata* mtd;
-    mtd = [[SSDownloadMetadata alloc] initWithKind:mediaKind];
+{
+    SSDownloadMetadata* mtd = [[SSDownloadMetadata alloc] initWithKind:mediaKind];
 
     // podcast handling
     if ([mediaKind isEqualToString:@"podcast"] ||
@@ -67,8 +52,6 @@
         }
     }
 
-    [mtd setPrimaryAssetURL:[NSURL fileURLWithPath:npath]];
-
     double duration = [[info objectForKey:@"duration"] doubleValue];
     NSNumber* duration_num = [NSNumber numberWithUnsignedLongLong:duration];
 
@@ -82,6 +65,8 @@
     [mtd setGenre:[info objectForKey:@"type"]];
     [mtd setReleaseYear:[info objectForKey:@"year"]];
     [mtd setPurchaseDate:[NSDate date]];
+    [mtd setComposerName:@"Gremlin"];
+    [mtd setBundleIdentifier:@"co.cocoanuts.gremlin.gritunesimporter"];
 
     // descriptions
     [mtd setShortDescription:[info objectForKey:@"shortDescription"]];
@@ -91,21 +76,31 @@
     if (imageData != nil) {
         // if we have cover art, we write it to file next to
         // the media asset, and tell SS where to find it
-        NSString* ap = [[npath stringByDeletingPathExtension] 
+        NSString* ap = [[path stringByDeletingPathExtension] 
                             stringByAppendingPathExtension:@"jpg"];
         [imageData writeToFile:ap atomically:NO];
         [mtd setFullSizeImageURL:[NSURL fileURLWithPath:ap]];
     }
 
+    return [mtd autorelease];
+}
+
++ (SSDownload*)_downloadWithDownloadMetadata:(SSDownloadMetadata*)mtd
+                                        path:(NSString*)filePath
+{
+    [mtd setPrimaryAssetURL:[NSURL fileURLWithPath:filePath]];
+
     SSDownload* dl = [[SSDownload alloc] initWithDownloadMetadata:mtd];
-    SSDownloadQueue* queue = [self downloadQueue];
+    [[self downloadQueue] addDownload:dl];
 
-    [queue addDownload:dl];
+    return [dl autorelease];
+}
 
++ (void)_waitForDownloadCompletion:(SSDownload*)download
+{
     NSConditionLock* dlLock = [[NSConditionLock alloc] initWithCondition:0];
 
-    [dl setDownloadHandler:nil completionBlock:^{
-        // how do we know if the download failed? look into this
+    [download setDownloadHandler:nil completionBlock:^{
         [dlLock lock];
         [dlLock unlockWithCondition:1];
     }];
@@ -113,10 +108,54 @@
     [dlLock lockWhenCondition:1];
     [dlLock unlock];
     [dlLock release];
+}
 
-    [dl release];
++ (BOOL)importAudioFileAtPath:(NSString*)path
+                    mediaKind:(NSString*)mediaKind
+                 withMetadata:(NSDictionary*)info
+{
+    // if the provided metadata does not at least contain a track
+    // then we should bail out quickly, as this is not a supported
+    // scenario (StoreServices will not choke, it'll instead just
+    // fail silently, which is far worse)
+    if ([[info objectForKey:@"title"] length] == 0)
+        return NO;
+    
+    NSString* tmpPrefix, *uniqueName, *filename, *sandboxPath;
+    filename = [path lastPathComponent];
+    tmpPrefix = [[path stringByDeletingLastPathComponent] lastPathComponent];
+    uniqueName = [tmpPrefix stringByAppendingString:filename];
+    sandboxPath = [kDownloadsDir stringByAppendingPathComponent:uniqueName];
 
-    return YES;
+    [[NSFileManager defaultManager] createDirectoryAtPath:kDownloadsDir 
+                              withIntermediateDirectories:YES 
+                                               attributes:nil
+                                                    error:nil];
+
+    // we need to move the files into a sandbox-reachable dir
+    NSError* error = nil;
+    if (![[NSFileManager defaultManager] moveItemAtPath:path 
+                                                 toPath:sandboxPath
+                                                  error:&error]) {
+        NSLog(@"error moving file to sandbox-readable dir: %@", error);
+        return NO;
+    }
+
+    SSDownloadMetadata* mtd = [self _downloadMetadataForItemAtPath:sandboxPath
+                                                         mediaKind:mediaKind
+                                                      withMetadata:info];
+
+    SSDownload* dl = [self _downloadWithDownloadMetadata:mtd path:sandboxPath];
+    if (dl != nil) {
+        [self _waitForDownloadCompletion:dl];
+
+        // [[NSFileManager defaultManager] removeItemAtPath:sandboxPath 
+        //                                            error:nil];
+
+        return YES;
+    }
+
+    return NO;
 }
 
 @end

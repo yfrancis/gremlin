@@ -4,10 +4,11 @@
 
 #import <AVFoundation/AVFoundation.h>
 
-@interface GRiTunesMP4Utilities
+@interface GRiTunesMP4Utilities : NSObject
 
-+ (BOOL)convertAsset:(AVAsset*)asset
++ (BOOL)convertAsset:(AVURLAsset*)asset
                 dest:(NSString*)dest
+            metadata:(NSDictionary*)metadata
            timeRange:(CMTimeRange)timeRange
                error:(NSError**)error;
 

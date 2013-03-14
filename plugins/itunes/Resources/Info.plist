@@ -10,6 +10,7 @@
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>m4a</string>
+				<string>aac</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string></string>
@@ -22,6 +23,8 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.apple.m4a-audio</string>
+				<string>com.apple.protected-mpeg-4-audio</string>
+				<string>public.aac-audio</string>
 			</array>
 		</dict>
 		<dict>

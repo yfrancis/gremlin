@@ -53,6 +53,7 @@ supportedForSession:(AVAssetExportSession*)session
 }
 
 + (NSArray*)_translatedMetadataKeysForAsset:(AVAsset*)asset
+                           externalMetadata:(NSDictionary*)external
 {
     NSDictionary* itunesKeys;
     itunesKeys = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -67,8 +68,15 @@ supportedForSession:(AVAssetExportSession*)session
     // AVAssetExportPresetAppleM4A does not pass metadata from source to output
     // we need to scan for ID3 metadata and convert it to itunes metadata
     // where possible (i.e. for keys in the common keyspace)
+    BOOL didSetExternalTitle = NO;
     NSArray* sourceMetadata = [asset commonMetadata];
     for (AVMutableMetadataItem* mdi in sourceMetadata) {
+        if ([mdi.commonKey isEqualToString:AVMetadataCommonKeyTitle]) {
+            NSLog(@"found title key, setting title = %@", [external objectForKey:@"title"]);
+            mdi.value = [external objectForKey:@"title"];
+            didSetExternalTitle = YES;
+        }
+
         NSString* key = [itunesKeys objectForKey:mdi.commonKey];
         if (key != nil) {
             // we have to do a bit of extra work for artwork if the source
@@ -86,11 +94,22 @@ supportedForSession:(AVAssetExportSession*)session
         }
     }
 
+    if (!didSetExternalTitle) {
+        NSLog(@"did not find title key, setting title = %@", [external objectForKey:@"title"]);
+        AVMutableMetadataItem* t = [AVMutableMetadataItem metadataItem];
+        t.key = AVMetadataCommonKeyTitle;
+        t.keySpace = AVMetadataKeySpaceCommon;
+        t.value = [external objectForKey:@"title"];
+        sourceMetadata = [[sourceMetadata mutableCopy] autorelease];
+        [(NSMutableArray*)sourceMetadata addObject:t];
+    }
+
     return sourceMetadata;
 }
 
 + (AVAssetExportSessionStatus)_convertAsset:(AVAsset*)asset
                                      outURL:(NSURL*)outURL
+                                   metadata:(NSDictionary*)metadata
                                  outputType:(NSString*)outputType
                                   timeRange:(CMTimeRange)timeRange
 {
@@ -111,7 +130,8 @@ supportedForSession:(AVAssetExportSession*)session
 
     session.outputFileType = AVFileTypeAppleM4A;
     session.outputURL = outURL;
-    session.metadata = [self _translatedMetadataKeysForAsset:asset];
+    session.metadata = [self _translatedMetadataKeysForAsset:asset 
+                                            externalMetadata:metadata];
 
     if (!CMTimeRangeEqual(kCMTimeRangeZero, timeRange)) {
         // client has specified a time range, first check
@@ -183,9 +203,10 @@ supportedForSession:(AVAssetExportSession*)session
     __block BOOL isVideo = NO;
 
     NSArray* tracks = asset.tracks;
-    [tracks enumerateObjectsUsingBlock:^(AVAssetTrack* track,
+    [tracks enumerateObjectsUsingBlock:^(id assetTrack,
                                          NSUInteger idx,
                                          BOOL* stop) {
+        AVAssetTrack* track = (AVAssetTrack*)assetTrack;
         if ([track.mediaType isEqualToString:AVMediaTypeVideo] ||
             [track.mediaType isEqualToString:AVMediaTypeMuxed]) {
             isVideo = YES;
@@ -198,6 +219,7 @@ supportedForSession:(AVAssetExportSession*)session
 
 + (BOOL)convertAsset:(AVURLAsset*)asset
                 dest:(NSString*)dest
+            metadata:(NSDictionary*)metadata
            timeRange:(CMTimeRange)timeRange
                error:(NSError**)error
 {
@@ -222,6 +244,7 @@ supportedForSession:(AVAssetExportSession*)session
             // perform the conversion synchronously
             status = [self _convertAsset:asset
                                   outURL:[NSURL fileURLWithPath:dest]
+                                metadata:metadata
                               outputType:AVFileTypeAppleM4A
                                timeRange:timeRange];
             break;
