@@ -7,6 +7,6 @@ FRAMEWORK_NAME = GRActivities
 GRActivities_FILES = $(wildcard *.m)
 GRActivities_CFLAGS += -F../framework/_/Library/Frameworks
 GRActivities_LDFLAGS += -F../framework/_/Library/Frameworks
-GRActivities_FRAMEWORKS = UIKit CoreGraphics MediaPlayer Gremlin
+GRActivities_FRAMEWORKS = UIKit CoreGraphics MediaPlayer MobileCoreServices Gremlin
 
 include $(THEOS_MAKE_PATH)/framework.mk

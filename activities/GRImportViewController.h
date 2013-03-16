@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Gremlin/Gremlin.h>
 
 typedef void (^GRImportViewControllerCompletionBlock)(BOOL hasBeenCanceled);
 
-@interface GRImportViewController : UITableViewController <UITextFieldDelegate, UIActionSheetDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+@interface GRImportViewController : UITableViewController <GremlinListener, UIPopoverControllerDelegate, UITextFieldDelegate, UIActionSheetDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 
 @property (nonatomic, copy) GRImportViewControllerCompletionBlock completionBlock;
 @property (nonatomic, assign) BOOL showKindSelector;

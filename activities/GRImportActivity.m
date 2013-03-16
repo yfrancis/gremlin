@@ -69,6 +69,7 @@
 
 - (UIViewController*)activityViewController
 {
+#if 0
 	if (!_files.count)
 		return nil;
 
@@ -81,6 +82,8 @@
 	}];
 
 	return [[UINavigationController alloc] initWithRootViewController:importVC];
+#endif
+	return nil;
 }
 
 - (void)cancelImport:(id)sender

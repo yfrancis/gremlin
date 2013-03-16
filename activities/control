@@ -7,5 +7,5 @@ Architecture: iphoneos-arm
 Description: Gremlin import activities for iOS6
 Maintainer: CocoaNuts <support+gractivities@cocoanuts.co>
 Author: CocoaNuts <support+gractivities@cocoanuts.co>
-Section: System
-Tag: role::developer
+Section: Development
+Tag: role::developer, cydia::obsolete
